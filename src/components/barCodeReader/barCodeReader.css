@@ -1,0 +1,35 @@
+.barCodeReader {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+  min-height: 100vh;
+  background: azure;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.scanned {
+  width: 400px !important;
+  height: 400px !important;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 30px 40px;
+  gap: 15px;
+  box-shadow: 1px 0 8px rgb(10, 107, 203);
+  border: 1px solid rgba(58, 140, 223, 0.774);
+  background: var(--bgColor) !important;
+  font-size: 16px;
+  color: #fff;
+}
+
+.scanned p {
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+}

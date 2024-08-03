@@ -11,3 +11,24 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+}
+
+.custom-sider {
+  box-shadow: 4px 0 8px #00000033;
+}
+
+.custom-sider .ant-layout-sider-trigger {
+  background-color: #c2c2c2;
+  color: #000000;
+  /* Trigger button background color */
+}

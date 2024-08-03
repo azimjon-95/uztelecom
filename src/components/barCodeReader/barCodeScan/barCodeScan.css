@@ -1,0 +1,10 @@
+.barCodeScan {
+  width: 500px;
+  height: auto;
+}
+
+.scanned {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}

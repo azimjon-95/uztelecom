@@ -3,12 +3,10 @@ import "./barCodeReader.css";
 import BarCodeScan from "./barCodeScan/BarCodeScan";
 
 function BarCodeReader() {
-
   let [id, setId] = useState("");
   const onNewScanResult = (decodedText, decodedResult) => {
     setId(decodedText);
   };
-
 
   return (
     <div className="barCodeReader">

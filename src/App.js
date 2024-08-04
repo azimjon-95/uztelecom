@@ -29,7 +29,7 @@ const App = () => {
               collapsible
               collapsed={collapsed}
               onCollapse={toggleCollapse}
-              style={{ backgroundColor: '#e1e1e1' }}
+              style={{ backgroundColor: '#03B4FF' }}
               className="custom-sider" // Apply the custom class
             >
               <Sidebar role={role} collapsed={collapsed} />

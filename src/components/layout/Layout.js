@@ -50,7 +50,7 @@ const Sidebar = ({ role, collapsed, onScan }) => {
                 selectedKeys={[location.pathname]}
                 mode="inline"
                 onClick={handleClick}
-                style={{ backgroundColor: '#e1e1e1' }}
+                style={{ backgroundColor: '#03B4FF' }}
             >
                 <div className="logo">
                     <img width={collapsed ? 38 : 150} src={collapsed ? logoTwo : logoOne} alt="" />

@@ -38,3 +38,7 @@
     color: #03B4FF;
     text-decoration: none;
 }
+
+.react-international-phone-country-selector {
+    display: none;
+}

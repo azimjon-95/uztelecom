@@ -57,7 +57,7 @@ const useCRUD = (endpoint) => {
     const signIn = async (credentials) => {
         setLoading(true);
         try {
-            const response = await axios.post(`${endpoint}/signin`, credentials);
+            const response = await axios.post(`${endpoint}`, credentials);
             localStorage.setItem('role', response.data.role);
             return response.data;
         } catch (err) {

@@ -1,0 +1,40 @@
+.login_BODY {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #03B4FF 50%, #fff 50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login_container {
+    background: #fff;
+    width: 300px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.251);
+    text-align: center;
+}
+
+.login-box h2 {
+    margin: 0 0 20px;
+    padding: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.textbox {
+    position: relative;
+    margin-bottom: 35px;
+}
+
+
+.forgot {
+    display: block;
+    text-align: left;
+    margin-bottom: 20px;
+    color: #03B4FF;
+    text-decoration: none;
+}

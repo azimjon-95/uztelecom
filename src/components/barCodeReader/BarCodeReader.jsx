@@ -1,14 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./barCodeReader.css";
 import BarCodeScan from "./barCodeScan/BarCodeScan";
+import CustomLayout from "../layout/Layout";
 
 function BarCodeReader() {
-  const [id, setId] = useState("");
-
-  const onNewScanResult = (decodedText, decodedResult) => {
-    console.log("OK");
-    setId(decodedText);
-    console.log(decodedText, decodedResult);
+  let [id, setId] = useState("");
+  let getData = (id) => {
+    console.log(id);
+    // fetch data
   };
 
   return (
@@ -18,18 +17,21 @@ function BarCodeReader() {
           fps={10}
           qrbox={450}
           disableFlip={false}
-          qrCodeSuccessCallback={onNewScanResult}
+          qrCodeSuccessCallback={(decodedText, decodedResult) => {
+            if (id === "") {
+              getData(decodedText);
+              setId(decodedText);
+            }
+          }}
           shouldStopScanner={() => !!id}
         />
       ) : (
-        <div className="scanned">
-          <p>Barcode: {id}</p>
-        </div>
+        <CustomLayout>
+          <h1>Loading...</h1>
+        </CustomLayout>
       )}
-      <h1>{id}</h1>
     </div>
   );
 }
 
 export default BarCodeReader;
-

@@ -26,9 +26,3 @@ a {
 .custom-sider {
   box-shadow: 4px 0 8px #00000033;
 }
-
-.custom-sider .ant-layout-sider-trigger {
-  background-color: #00a4eb;
-  color: #000000;
-  /* Trigger button background color */
-}

@@ -1,10 +1,158 @@
 .logo {
-    width: 87%;
-    height: 40px;
-    border-radius: 10px;
+  width: 87%;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+
+.custom-sider {
+  background-color: #03B4FF;
+}
+
+.logo img {
+  margin: 16px;
+}
+
+/* style.css */
+
+@media (max-width: 768px) {
+  .custom-sider {
+    display: none;
+  }
+
+  .custom-menu-horizontal {
+    display: block;
     display: flex;
-    justify-content: center;
+    height: 60px;
+    z-index: 5;
+  }
+
+  .MenuMobile {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background: rgb(33, 37, 41);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 10px;
+    gap: 5px;
+  }
+
+  .mobileBottom_menu>span {
+    line-height: 22px;
+  }
+
+  .Space_mobile {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    margin-top: 10px;
-    margin-left: 10px;
+  }
+
+  .mobileBottom_menu {
+    color: #b8b8b8;
+    z-index: 5;
+  }
+
+  .mobileBottom_menu span a {
+    width: 100%;
+  }
+
+  /* Barcha menyu elementlarini bir qator qilib ko'rsatish */
+  .menu-horizontal {
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    /* Menyuni o'ngga scroll qilish imkonini beradi */
+    white-space: nowrap;
+    /* Elementlarning bir qatorga joylashishini ta'minlaydi */
+  }
+
+  /* Scroll uchun qidirish oynasi */
+  .menu-horizontal::-webkit-scrollbar {
+    height: 4px;
+    /* Scroll bar balandligi */
+  }
+
+  .menu-horizontal::-webkit-scrollbar-thumb {
+    background-color: #888;
+    /* Scroll bar rangi */
+    border-radius: 4px;
+    /* Radius */
+  }
+
+  .menu-horizontal::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+    /* Hover holatda scroll bar rangi */
+  }
+
+  .ant-menu-overflow-item-rest {
+    display: none;
+    /* O'zgarishi kerak bo'lgan bo'limni ko'rsatadi */
+  }
+}
+
+.custom-menu-horizontal {
+  display: none;
+}
+
+.logout-btn {
+  width: 60%;
+  height: 40px;
+  background: #f95b5b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  color: #fff;
+}
+
+/* @media (max-width: 768px) {
+  .ant-layout-sider {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    height: 45px !important;
+    z-index: 1000;
+
+  }
+
+  .ant-layout-content {
+    height: 50px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: blue;
+  }
+
+  .ant-layout {
+    height: 50px;
+  }
+
+  .ant-menu-item {
+    width: 100%;
+    text-align: center;
+  }
+
+  .ant-menu {
+    display: flex;
+    justify-content: space-around;
+  }
+} */
+
+
+.custom-sider .ant-layout-sider-trigger {
+  background-color: #00a4eb;
+  color: #000000;
+  /* Trigger button background color */
 }

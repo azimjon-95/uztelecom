@@ -1,8 +1,131 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { Form, Input, Button, Row, Col, message } from 'antd';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import useCRUD from '../../../hooks/useCRUD';
+import CustomLayout from '../../../components/layout/Layout';
 
 const RegisterAbonent = () => {
+    const { createData } = useCRUD('/users');
+    const [form] = Form.useForm();
+    const navigate = useNavigate();
+
+    const onFinish = (values) => {
+
+        createData(values).then(() => {
+            message.success('Ishchi muvaffaqiyatli qo\'shildi!');
+            navigate(-1);
+        });
+
+    };
+
+
+    const handleBack = () => {
+        navigate(-1);
+    };
     return (
-        <div>RegisterAbonent</div>
+        <CustomLayout>
+            <Form form={form} layout="vertical" onFinish={onFinish}>
+                <h2 style={{ textAlign: "center", color: "gray", lineHeight: "30px", marginTop: "10px" }}>
+                    Abonentlarni Qabul qilish
+                </h2>
+                <Row gutter={16}>
+                    <Col span={8}>
+                        <Form.Item
+                            name="name"
+                            label="Ism"
+                            rules={[{ required: true, message: 'Iltimos, ismni kiriting!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                        <Form.Item
+                            name="email"
+                            label="Email"
+                            rules={[{ required: true, message: 'Iltimos, emailni kiriting!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                        <Form.Item
+                            name="phone"
+                            label="Telefon raqam"
+                            rules={[{ required: true, message: 'Iltimos, telefon raqamni kiriting!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col span={8}>
+                        <Form.Item
+                            name="address"
+                            label="Manzil"
+                            rules={[{ required: true, message: 'Iltimos, manzilni kiriting!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                        <Form.Item
+                            name="city"
+                            label="Shahar"
+                            rules={[{ required: true, message: 'Iltimos, shaharni kiriting!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                        <Form.Item
+                            name="country"
+                            label="Davlat"
+                            rules={[{ required: true, message: 'Iltimos, davlatni kiriting!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col span={8}>
+                        <Form.Item
+                            name="postalCode"
+                            label="Pochta kodi"
+                            rules={[{ required: true, message: 'Iltimos, pochta kodini kiriting!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                        <Form.Item
+                            name="company"
+                            label="Kompaniya"
+                            rules={[{ required: true, message: 'Iltimos, kompaniya nomini kiriting!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                        <Form.Item
+                            name="position"
+                            label="Lavozim"
+                            rules={[{ required: true, message: 'Iltimos, lavozimni kiriting!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <div style={{ width: "100%", display: "flex", gap: "5px" }}>
+                    <Button style={{ width: "100%" }} type="primary" htmlType="submit">
+                        Roʻyxatga oʻtish
+                    </Button>
+                    <Button type="default" icon={<ArrowLeftOutlined />} onClick={handleBack} style={{ marginLeft: 8 }}>
+                        Orqaga
+                    </Button>
+                </div>
+            </Form>
+        </CustomLayout>
     )
 }
 

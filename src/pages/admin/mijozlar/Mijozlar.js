@@ -75,7 +75,7 @@ const data = [
     },
 ];
 
-const Abonents = () => {
+const Mijozlar = () => {
     return (
         <CustomLayout>
             <div style={{ padding: 5 }}>
@@ -86,4 +86,4 @@ const Abonents = () => {
     );
 };
 
-export default Abonents;
+export default Mijozlar;

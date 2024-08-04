@@ -54,7 +54,21 @@ const useCRUD = (endpoint) => {
         }
     };
 
-    return { data, error, loading, fetchData, createData, updateData, deleteData };
+    const signIn = async (credentials) => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`${endpoint}/signin`, credentials);
+            localStorage.setItem('role', response.data.role);
+            return response.data;
+        } catch (err) {
+            setError(err);
+            throw err; // Xatolikni tashqariga chiqarish
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return { data, error, loading, fetchData, createData, updateData, deleteData, signIn };
 };
 
 export default useCRUD;

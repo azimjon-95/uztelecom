@@ -14,7 +14,7 @@ import {
 import './style.css';
 import logoOne from '../../assets/logoOne.png';
 import logoTwo from '../../assets/logoTwo.png';
-// import BarCodeReader from '../barCodeReader/BarCodeReader';
+import BarCodeReader from '../barCodeReader/BarCodeReader';
 
 const Sidebar = ({ role, collapsed, onScan }) => {
     const navigate = useNavigate();
@@ -76,7 +76,12 @@ const Sidebar = ({ role, collapsed, onScan }) => {
                         <Menu.Item onClick={() => setOpenQrScanner(!openQrScanner)} icon={<ScanOutlined />}>
                             Read Barcode
                         </Menu.Item>
-                        {/* {openQrScanner && <BarCodeReader />} */}
+                        {openQrScanner &&
+                            <div style={{ width: "200px", height: "200px", border: "1px solid grey" }}>
+
+                                <BarCodeReader />
+                            </div>
+                        }
                     </>
                 ) : null}
                 <Menu.Item key="logout" icon={<LogoutOutlined />}>

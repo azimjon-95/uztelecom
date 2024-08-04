@@ -14,6 +14,7 @@ import {
 import "./style.css";
 import logoOne from "../../assets/logoOne.png";
 import logoTwo from "../../assets/logoTwo.png";
+import logo from "../../logo.svg";
 import BarCodeReader from "../barCodeReader/BarCodeReader";
 
 const Sidebar = ({ role, collapsed, onScan }) => {
@@ -54,9 +55,14 @@ const Sidebar = ({ role, collapsed, onScan }) => {
         style={{ backgroundColor: "#03B4FF" }}
       >
         <div className="logo">
-          <img
+          {/* <img
             width={collapsed ? 38 : 150}
             src={collapsed ? logoTwo : logoOne}
+            alt=""
+          /> */}
+          <img
+            width={collapsed ? 38 : 150}
+            src={collapsed ? logoTwo : logo}
             alt=""
           />
         </div>

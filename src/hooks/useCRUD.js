@@ -31,10 +31,10 @@ const useCRUD = (endpoint) => {
     try {
       const response = await axios.post(endpoint, newData, headers);
       setData([...data, response.data]);
-      return response;
+      return response.data; // Yangi yaratilingan ma'lumotni qaytarish
     } catch (err) {
       setError(err);
-      return err;
+      throw err; // Xatolikni tashqariga chiqarish
     } finally {
       setLoading(false);
     }
@@ -43,14 +43,15 @@ const useCRUD = (endpoint) => {
   const updateData = async (id, updatedData) => {
     setLoading(true);
     try {
-      const response = await axios.put(
-        `${endpoint}/${id}`,
-        updatedData,
-        headers
+      const response = await axios.put(`${endpoint}/${id}`, updatedData, headers);
+      const updatedItems = data.map((item) =>
+        item.id === id ? response.data : item
       );
-      setData(data.map((item) => (item.id === id ? response.data : item)));
+      setData(updatedItems);
+      return response.data; // Yangilangan ma'lumotni qaytarish
     } catch (err) {
       setError(err);
+      throw err; // Xatolikni tashqariga chiqarish
     } finally {
       setLoading(false);
     }
@@ -60,9 +61,12 @@ const useCRUD = (endpoint) => {
     setLoading(true);
     try {
       await axios.delete(`${endpoint}/${id}`, headers);
-      setData(data.filter((item) => item.id !== id));
+      const filteredData = data.filter((item) => item.id !== id);
+      setData(filteredData);
+      return id; // O'chirilgan ma'lumotning ID sini qaytarish
     } catch (err) {
       setError(err);
+      throw err; // Xatolikni tashqariga chiqarish
     } finally {
       setLoading(false);
     }
@@ -96,3 +100,4 @@ const useCRUD = (endpoint) => {
 };
 
 export default useCRUD;
+

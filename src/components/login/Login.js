@@ -12,17 +12,27 @@ const Login = () => {
   const [phone, setPhone] = useState("");
 
   const onFinish = async (values) => {
-    values.phone_number = values.phone_number.replace("+", "");
+    // Telefon raqamini formatlash
+    const formattedPhoneNumber = values.phone_number.replace("+", "");
+    values.phone_number = formattedPhoneNumber;
+
 
     try {
-      const user = await signIn(values);
-      user?.result?.role?.name === "admin"
-        ? navigate("/abonents/admin")
-        : navigate("/abonents");
+      const response = await signIn(values);
+      if (response?.result?.role?.name === "admin") {
+        // Admin uchun navigatsiya
+        navigate("/abonents/admin");
+      } else {
+        // Oddiy foydalanuvchi uchun navigatsiya
+        navigate("/abonents");
+      }
     } catch (err) {
-      message.error(err?.response?.data?.result);
+      // Xatolikni qayta ishlash
+      const errorMessage = err?.response?.data?.result || "Noma'lum xatolik yuz berdi";
+      message.error(errorMessage);
     }
   };
+
 
   return (
     <div className="login_BODY">

@@ -64,9 +64,8 @@ const useCRUD = (endpoint) => {
     setLoading(true);
     try {
       const response = await axios.post(`${endpoint}`, credentials);
-      localStorage.setItem("role", response.data.result?.role?.name);
-      localStorage.setItem("token", response.data.result?.token);
-
+      localStorage.setItem("role", response?.data?.result?.role?.name);
+      localStorage.setItem("token", response?.data?.result?.token);
       return response.data;
     } catch (err) {
       setError(err);

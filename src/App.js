@@ -1,6 +1,7 @@
-import React, { useMemo } from "react";
-import { Route, Routes } from "react-router-dom";
+import React, { useMemo, useEffect, useState } from "react";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import "antd/dist/reset.css";
+import { Button, Result } from 'antd';
 import Abonents from "./pages/workers/abonents/Abonents";
 import Login from "./components/login/Login";
 import RegisterAbonent from "./pages/workers/registerAbonents/RegisterAbonent";
@@ -11,9 +12,20 @@ import AddForm from "./pages/admin/workers/Add";
 import Mijozlar from "./pages/admin/mijozlar/Mijozlar";
 
 const App = () => {
-  const role = useMemo(() => localStorage.getItem("role"), []);
+  const [role, setRole] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedRole = localStorage.getItem("role");
+    if (savedRole) {
+      setRole(savedRole);
+    } else {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const MainComponent = role === "admin" ? Mijozlar : Abonents;
+
 
   return (
     <Routes>
@@ -31,7 +43,18 @@ const App = () => {
       ) : (
         <Route path="/login" element={<Login />} />
       )}
-      <Route path="*" element={<div>404 Not Found</div>} />
+      <Route path="*" element={<div className="not-found">
+        <Result
+          status="404"
+          title="404"
+          subTitle="Kechirasiz, bu sahifa mavjud emas."
+          extra={
+            <Button type="primary" onClick={() => navigate('/')}>
+              Asosiy sahifaga qaytish
+            </Button>
+          }
+        />
+      </div>} />
     </Routes>
   );
 };

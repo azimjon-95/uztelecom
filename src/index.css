@@ -26,3 +26,28 @@ a {
 .custom-sider {
   box-shadow: 4px 0 8px #00000033;
 }
+
+.not-found {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.ant-result {
+  padding: 40px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ant-result-title {
+  font-size: 48px;
+  color: #1890ff;
+}
+
+.ant-result-subtitle {
+  font-size: 18px;
+  color: #666;
+}

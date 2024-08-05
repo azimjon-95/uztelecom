@@ -7,7 +7,7 @@ import CustomLayout from "../../../components/layout/Layout";
 
 const AddForm = () => {
   const { updateData } = useCRUD("/users");
-  const { createData } = useCRUD("/auth/register");
+  const { createData, error } = useCRUD("/auth/register");
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,13 +27,14 @@ const AddForm = () => {
         navigate(-1);
       });
     } else {
-      let result = createData(values);
-      console.log(result);
-
-      //  .then(() => {
-      //     message.success("Ishchi muvaffaqiyatli qo'shildi!");
-      //     navigate(-1);
-      //   });
+      createData(values).then((res) => {
+        if (res?.data?.result) {
+          message.success(res?.data?.result);
+          navigate(-1);
+        } else {
+          message.error(error?.response?.data?.message);
+        }
+      });
     }
   };
 

@@ -8,7 +8,7 @@ import "./style.css";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn, error, loading } = useCRUD("/auth/login"); // API endpoint
+  const { signIn, loading } = useCRUD("/auth/login"); // API endpoint
   const [phone, setPhone] = useState("");
 
   const onFinish = async (values) => {

@@ -2,17 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
     UserOutlined,
     TeamOutlined,
-    UserAddOutlined,
-    SettingOutlined,
-    BarcodeOutlined,
     LogoutOutlined
 } from '@ant-design/icons';
 import { Layout, Menu, Modal } from 'antd'; // Modal import qiling
 import './style.css';
 import logoOne from '../../assets/logo.svg';
 import logoTwo from '../../assets/logoTwo.png';
-import { Link, useNavigate } from 'react-router-dom';
-import BarCodeReader from '../barCodeReader/BarCodeReader';
+import { Link } from 'react-router-dom';
 
 const { Sider, Content } = Layout;
 
@@ -20,9 +16,7 @@ const CustomLayout = ({ children }) => {
     const [collapsed, setCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [activeItem, setActiveItem] = useState(null);
-    const [showBarcodeModal, setShowBarcodeModal] = useState(false);
     const role = localStorage.getItem('role');
-    const navigate = useNavigate();
     const [modalVisible, setModalVisible] = useState(false); // Modal ko'rsatish holatini saqlash uchun
 
     useEffect(() => {
@@ -56,15 +50,13 @@ const CustomLayout = ({ children }) => {
     };
 
     const menuItems = [
-        { key: '1', icon: <UserOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/abonents/admin">Abonentlar</Link> },
+        { key: '1', icon: <UserOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/fileManagement">Fayl boshqaruvi</Link> },
         { key: '2', icon: <TeamOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/workers">Hodimlar</Link> },
         { key: 'logout', icon: <LogoutOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <span style={{ color: "#fff" }}>Tizimdan chiqish</span>, onClick: showLogoutModal }
     ];
 
     const menuTeacher = [
-        { key: '1', icon: <UserOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/abonents">Abonentlar</Link> },
-        { key: '2', icon: <UserAddOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/createAbonents">{isMobile ? "Register" : "Ro'yhatga olish"}</Link> },
-        { key: '3', icon: <BarcodeOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <span style={{ color: "#fff" }}>{isMobile ? "Barcode" : "Barcode o'qish"}</span>, onClick: () => setShowBarcodeModal(true) },
+        { key: '1', icon: <UserOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/">Abonent</Link> },
         { key: 'logout', icon: <LogoutOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <span style={{ color: "#fff" }}>Tizimdan chiqish</span>, onClick: showLogoutModal }
     ];
 
@@ -154,14 +146,7 @@ const CustomLayout = ({ children }) => {
                 <p>Chiqmoqchimisiz?</p>
             </Modal>
 
-            <Modal
-                title="Barcode o'qish"
-                open={showBarcodeModal}
-                onCancel={() => setShowBarcodeModal(false)}
-                footer={null}
-            >
-                <BarCodeReader />
-            </Modal>
+
         </Layout>
     );
 };

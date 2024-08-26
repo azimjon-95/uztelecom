@@ -1,15 +1,14 @@
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import "antd/dist/reset.css";
 import { Button, Result } from 'antd';
-import Abonents from "./pages/workers/abonents/Abonents";
 import Login from "./components/login/Login";
-import RegisterAbonent from "./pages/workers/registerAbonents/RegisterAbonent";
 import Read from "./pages/admin/workers/Read";
-import ScinerPage from "./pages/workers/scinerPage/ScinerPage";
-import "./index.css";
 import AddForm from "./pages/admin/workers/Add";
-import Mijozlar from "./pages/admin/mijozlar/Mijozlar";
+import ScanPage from "./pages/workers/ScanPage";
+import FileManagement from "./pages/admin/adminPanel/AdminPanel";
+import "./index.css";
+import Abonents from "./pages/workers/AllAbonents";
 
 const App = () => {
   const [role, setRole] = useState(null);
@@ -24,37 +23,40 @@ const App = () => {
     }
   }, [navigate]);
 
-  const MainComponent = role === "admin" ? Mijozlar : Abonents;
-
+  const isAdmin = role === "admin";
+  const isUser = role === "user";
 
   return (
     <Routes>
-      {role === "admin" || role === "user" ? (
+      <Route path="/login" element={<Login />} />
+      {isAdmin && (
         <>
-          <Route path="/abonents" element={<Abonents />} />
-          <Route path="/abonents/admin" element={<Mijozlar />} />
+          <Route path="/fileManagement" element={<FileManagement />} />
           <Route path="/addForm" element={<AddForm />} />
           <Route path="/workers" element={<Read />} />
-          <Route path="/createAbonents" element={<RegisterAbonent />} />
-          <Route path="/barcode" element={<ScinerPage />} />
-          <Route path="/login" element={<MainComponent />} />
-          <Route path="/" element={<MainComponent />} />
+          <Route path="/" element={<FileManagement />} />
         </>
-      ) : (
-        <Route path="/login" element={<Login />} />
       )}
-      <Route path="*" element={<div className="not-found">
-        <Result
-          status="404"
-          title="404"
-          subTitle="Kechirasiz, bu sahifa mavjud emas."
-          extra={
-            <Button type="primary" onClick={() => navigate('/')}>
-              Asosiy sahifaga qaytish
-            </Button>
-          }
-        />
-      </div>} />
+      {isUser && (
+        <>
+          <Route path="/scan/:id" element={<ScanPage />} />
+          <Route path="/" element={<Abonents />} />
+        </>
+      )}
+      <Route path="*" element={
+        <div className="not-found">
+          <Result
+            status="404"
+            title="404"
+            subTitle="Kechirasiz, bu sahifa mavjud emas."
+            extra={
+              <Button type="primary" onClick={() => navigate('/')}>
+                Asosiy sahifaga qaytish
+              </Button>
+            }
+          />
+        </div>
+      } />
     </Routes>
   );
 };

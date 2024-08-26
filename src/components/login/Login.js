@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from "react-router-dom";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 import { Form, Input, Button, message } from "antd";
@@ -8,8 +8,20 @@ import "./style.css";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn, loading } = useCRUD("/auth/login"); // API endpoint
+  const location = useLocation();
+  const [id, setId] = useState(null);
+  const { signIn, loading, error } = useCRUD("/auth/login"); // API endpoint
   const [phone, setPhone] = useState("");
+
+
+  // URL dan ID ni olish
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const idFromUrl = queryParams.get('id');
+    if (idFromUrl) {
+      setId(idFromUrl);
+    }
+  }, [location.search]);
 
   const onFinish = async (values) => {
     // Telefon raqamini formatlash
@@ -19,12 +31,17 @@ const Login = () => {
 
     try {
       const response = await signIn(values);
+      console.log(response);
       if (response?.result?.role?.name === "admin") {
         // Admin uchun navigatsiya
-        navigate("/abonents/admin");
+        navigate("/fileManagement");
       } else {
-        // Oddiy foydalanuvchi uchun navigatsiya
-        navigate("/abonents");
+        // Oddiy foydalanuvchi yoki fayl skan qilish sahifasiga yo'naltirish
+        if (id) {
+          navigate(`/scan/${id}`);
+        } else {
+          navigate("/");
+        }
       }
     } catch (err) {
       // Xatolikni qayta ishlash
@@ -32,7 +49,6 @@ const Login = () => {
       message.error(errorMessage);
     }
   };
-
 
   return (
     <div className="login_BODY">

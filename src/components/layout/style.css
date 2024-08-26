@@ -10,7 +10,7 @@
 
 
 .custom-sider {
-  background-color: #03B4FF;
+  background-color: #03b3ff69;
 }
 
 .logo img {
@@ -152,7 +152,7 @@
 
 
 .custom-sider .ant-layout-sider-trigger {
-  background-color: #00a4eb;
-  color: #000000;
+  background-color: #00a5eb2e;
+  color: #ffffff;
   /* Trigger button background color */
 }

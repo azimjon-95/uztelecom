@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import useCRUD from '../../hooks/useCRUD'; // useCRUD kancasini import qilish
 import './scanPage.css'; // Import the CSS file for styling
+import axios from 'axios';
 
 function ScanPage() {
     const navigate = useNavigate();
     const [fileData, setFileData] = useState([]);
-    const { getFileData, loading, error } = useCRUD(); // useCRUD'dan fetchData funksiyasini chaqirish
     const { id } = useParams();
-    const workerId = localStorage.getItem("workerId")
+    const [loading, setLoading] = useState(false);
 
-    const res = fileData?.filter(({ userId }) => userId?.id === workerId);
-    console.log(res);
 
     useEffect(() => {
         if (!id) {
@@ -28,14 +25,44 @@ function ScanPage() {
         }
     }, [navigate]);
 
+
+
     const fetchFileData = async (fileId) => {
+        setLoading(true);
         try {
-            const response = await getFileData(`${fileId}`);  // useCRUD'dan fetchData chaqirish
-            setFileData(response);  // Fayl ma'lumotlarini holatga o'rnatamiz
+            const response = await axios.get(`https://api.uztelecom.dadabayev.uz/api/file/show/${fileId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            const data = response?.data?.result;
+
+            // Agar `path` maydoni mavjud bo'lsa va string bo'lsa, uni JSON.parse orqali arrayga o'zgartirish
+            if (data && data.path && typeof data.path === 'string') {
+                try {
+                    const parsedData = JSON.parse(data.path);  // JSON matnni arrayga aylantirish
+                    if (Array.isArray(parsedData)) {
+                        setFileData(parsedData);  // To'g'ri olingan arrayni setFileData ga o'rnatish
+                    } else {
+                        setFileData([]);  // Agar array emas bo'lsa, bo'sh array o'rnatamiz
+                        console.error('Expected an array but got something else:', parsedData);
+                    }
+                } catch (parseError) {
+                    console.error('Parsing error:', parseError);
+                    setFileData([]);  // Parsingda xatolik bo'lsa, bo'sh array
+                }
+            } else {
+                setFileData([]);  // Default bo'sh array
+                console.error('Expected a string but got something else:', data.path);
+            }
+
         } catch (error) {
             console.error('Xatolik yuz berdi', error);
         }
+        setLoading(false);
     };
+
 
     // Get the headers from the first item in the fileData array
     const headers = fileData.length > 0 ? Object.keys(fileData[0]) : [];
@@ -65,7 +92,6 @@ function ScanPage() {
                     </tbody>
                 </table>
             )}
-            {error && <p className="error-message">Xatolik yuz berdi: {error.message}</p>}
         </div>
     );
 }

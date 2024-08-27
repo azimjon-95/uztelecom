@@ -10,14 +10,11 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 
 const Read = () => {
   const { data, loading, fetchData } = useCRUD("/user/get");
-  const { updateData } = useCRUD("/users");
-  const { createData, error } = useCRUD("/auth/register");
   const [openBox, setOpenBox] = useState(false);
   const location = useLocation();
   const [form] = Form.useForm();
   const currentUser = location.state?.currentUser || null;
   const [isEdit, setIsEdit] = useState(false); // State for edit mode
-  console.log(data);
   useEffect(() => {
     if (isEdit) {
       form.setFieldsValue(currentUser);
@@ -31,25 +28,44 @@ const Read = () => {
   }, []);
 
 
-  const onFinish = (values) => {
-    values.phone_number.replace("+", "");
+  const onFinish = async (values) => {
+    try {
+      // Remove "+" from phone_number
+      const formattedValues = {
+        ...values,
+        phone_number: values.phone_number.replace("+", "")
+      };
 
-    const action = isEdit ? updateData(currentUser.id, values) : createData(values);
+      // Set your token here
+      const token = localStorage.getItem("token"); // Replace with your actual token
 
-    action
-      .then((res) => {
-        if (res?.data?.result) {
-          message.success(isEdit ? "Ma'lumotlar muvaffaqiyatli yangilandi!" : "Foydalanuvchi muvaffaqiyatli qo'shildi!");
-          setOpenBox(false);
-          form.resetFields();
-          fetchData();
-        } else {
-          message.error(error?.response?.data?.message || "Xatolik yuz berdi!");
-        }
-      })
-      .catch((err) => {
-        message.error(err?.response?.data?.message || "Xatolik yuz berdi!");
-      });
+      // Make the API call based on `isEdit`
+      const response = isEdit
+        ? await axios.put(`/users/${currentUser.id}`, formattedValues, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        : await axios.post('/auth/register', formattedValues, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+      // Handle successful response
+      if (response?.data?.result) {
+        message.success(isEdit ? "Ma'lumotlar muvaffaqiyatli yangilandi!" : "Foydalanuvchi muvaffaqiyatli qo'shildi!");
+        setOpenBox(false); // Close the form box
+        form.resetFields(); // Reset the form
+        fetchData(); // Refresh the data
+      } else {
+        // If no result, throw an error
+        throw new Error(response?.data?.message || "Xatolik yuz berdi!");
+      }
+    } catch (error) {
+      // Handle and display error messages
+      message.error(error?.response?.data?.message || error.message || "Xatolik yuz berdi!");
+    }
   };
 
 
@@ -87,6 +103,8 @@ const Read = () => {
       },
     });
   };
+
+
   const columns = [
     { title: "ID", dataIndex: "id", key: "id" },
     { title: "Ism / Familiya", dataIndex: "full_name", key: "full_name" },

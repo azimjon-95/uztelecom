@@ -72,14 +72,14 @@ const FileManagement = () => {
         };
         fetchUserDataFile();
         fetchData();
-    }, []);
-
+    }, [setFileContent]);
+    console.log(dataFile);
 
     const sendDataToServer = async () => {
         try {
-            const response = await createData({ file: data });
+            await createData({ file: data });
             notification.success({ message: 'Ma\'lumotlar muvaffaqiyatli yuborildi!' });
-            console.log("Serverdan javob:", response.result);
+            setData([]);
         } catch (error) {
             console.error("Serverga ma'lumot jo'natishda xatolik:", error);
             notification.error({ message: 'Ma\'lumotlar jo\'natishda xatolik yuz berdi.' });

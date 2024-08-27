@@ -38,7 +38,7 @@ const useCRUD = (endpoint) => {
   const createData = async (newData) => {
     setLoading(true);
     try {
-      const response = await axios.post(endpoint, newData, fileUploadHeaders);
+      const response = await axios.post(endpoint, newData, defaultHeaders);
       setData([...data, response.data]);
       return response.data;
     } catch (err) {

@@ -74,6 +74,48 @@ const FileManagement = () => {
         fetchData();
     }, [setFileContent]);
 
+
+    // Handle file delete
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(`/file/delete/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                },
+            });
+
+            // Notify success
+            notification.success({
+                message: 'Success',
+                description: 'Fayl muvaffaqiyatli o\'chirildi.',
+                placement: 'bottomRight',
+            });
+
+            // Remove file from the state
+            setFileContent((prevFiles) => prevFiles.filter(file => file.id !== id));
+        } catch (error) {
+            console.error('Failed to delete file:', error);
+            notification.error({
+                message: 'Xato',
+                description: 'Faylni o\'chirishda xatolik yuz berdi.',
+                placement: 'bottomRight',
+            });
+        }
+    };
+
+    // Confirm delete action
+    const confirmDelete = (id) => {
+        Modal.confirm({
+            title: 'O\'chirishni tasdiqlang',
+            content: 'Siz ushbu faylni o\'chirishni tasdiqlaysizmi?',
+            okText: 'Ha',
+            okType: 'danger',
+            cancelText: 'Yo\'q',
+            onOk: () => handleDelete(id),
+        });
+    };
+
+
     const sendDataToServer = async () => {
         try {
             await createData({ file: data });
@@ -207,45 +249,6 @@ const FileManagement = () => {
             notification.error({ message: 'Faylni yuklab olishda xatolik yuz berdi' });
         }
     };
-
-
-
-    const handleDelete = async (id) => {
-        try {
-            await axios.delete(`/file/delete/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                },
-            });
-
-            // Notify success
-            notification.success({
-                message: 'Success',
-                description: 'Fayl muvaffaqiyatli o\'chirildi.',
-                placement: 'bottomRight',
-            });
-            // Optionally update the UI or state to reflect the deletion
-        } catch (error) {
-            console.error('Failed to delete file:', error);
-            notification.error({
-                message: 'Xato',
-                description: 'Faylni o\'chirishda xatolik yuz berdi.',
-                placement: 'bottomRight',
-            });
-        }
-    };
-    const confirmDelete = (id) => {
-        Modal.confirm({
-            title: 'O\'chirishni tasdiqlang',
-            content: 'Siz ushbu faylni o\'chirishni tasdiqlaysizmi?',
-            okText: 'Ha',
-            okType: 'danger',
-            cancelText: 'Yo\'q',
-            onOk: () => handleDelete(id),
-        });
-    };
-
-
 
     const handleDownloadQrCode = (id) => {
         // QR-kod uchun URL-ni yaratamiz
@@ -409,7 +412,10 @@ const FileManagement = () => {
                 )}
                 <Table pagination={false} size="small" columns={columns} dataSource={dataFile} rowKey="id" loading={loading} />
                 {selectedFile && (
-                    <FileDetails path={selectedFile} onClose={() => setSelectedFile(null)} />
+                    <div className="file-details">
+                        <FileDetails scroll={{ x: 5000 }} path={selectedFile} onClose={() => setSelectedFile(null)} />
+                    </div>
+
                 )}
 
                 {/* User Bog'lash Modal */}

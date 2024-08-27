@@ -66,3 +66,37 @@
     width: 30%;
     margin-top: 15px;
 }
+
+.file-details {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
+    padding: 10px;
+    background: #00000066;
+}
+
+/* Scroll bar styling for webkit browsers (Chrome, Safari) */
+.file-details::-webkit-scrollbar {
+    width: 5px;
+    /* Scroll bar width */
+}
+
+.file-details::-webkit-scrollbar-track {
+    background: #333;
+    /* Scroll bar track background */
+}
+
+.file-details::-webkit-scrollbar-thumb {
+    background: #888;
+    /* Scroll bar handle color */
+    border-radius: 6px;
+    /* Rounded corners for scrollbar handle */
+}
+
+.file-details::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    /* Color when hovering over scroll bar handle */
+}

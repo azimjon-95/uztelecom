@@ -73,7 +73,6 @@ const FileManagement = () => {
         fetchUserDataFile();
         fetchData();
     }, [setFileContent]);
-    console.log(dataFile);
 
     const sendDataToServer = async () => {
         try {
@@ -147,8 +146,6 @@ const FileManagement = () => {
         }
     };
 
-
-
     const [isModalVisible, setIsModalVisible] = useState(false);
     const handleCloseModal = () => {
         setIsModalVisible(true);
@@ -157,7 +154,7 @@ const FileManagement = () => {
         try {
             await axios.post('/file/un-merge', {
                 file_id: fileToUnMerge,
-                user_ids: selectedUsers,
+                user_id: selectedUsers,
             }, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -165,6 +162,7 @@ const FileManagement = () => {
             });
             notification.success({ message: 'Foydalanuvchilar muvaffaqiyatli ajratildi!' });
             handleCloseModal(); // Modalni yopish
+            setIsModalVisible(false)
         } catch (error) {
             console.error(error);
             notification.error({ message: 'Foydalanuvchilarni ajratishda xatolik yuz berdi' });
@@ -172,7 +170,7 @@ const FileManagement = () => {
     };
 
     const handleDeleteUser = (userId) => {
-        setSelectedUsers((prev) => [...prev, userId]);
+        setSelectedUsers(userId);
     };
 
 
@@ -259,7 +257,7 @@ const FileManagement = () => {
 
         // QR-kodni DOM ichida yaratamiz
         const qrCode = (
-            <QRCode value={qrCodeUrl} size={128} renderAs="svg" />
+            <QRCode value={qrCodeUrl} size={250} renderAs="svg" />
         );
         ReactDOM.render(qrCode, qrContainer);
 
@@ -322,7 +320,7 @@ const FileManagement = () => {
                 <Button
                     onClick={() => {
                         handleCloseModal(true); // Modalni ko'rsatish
-                        // tanlangan foydalanuvchilarni o'rnatish
+                        setFileToUnMerge(record.id)
                         setIsMergeModalVisible([record]);
                     }}
                     style={{ marginRight: 8 }}

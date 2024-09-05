@@ -30,7 +30,8 @@ function ScanPage() {
     const fetchFileData = async (fileId) => {
         setLoading(true);
         try {
-            const response = await axios.get(`https://api.uztelecom.dadabayev.uz/api/file/show/${fileId}`, {
+            const response = await axios.get(`https://api.uztelecom.dadabayev.uz/api/file/shows/${fileId}`, {
+                // const response = await axios.get(`https://api.uztelecom.dadabayev.uz/api/file/show/${fileId}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }

@@ -8,6 +8,9 @@
 # testing
 /coverage
 
+# Faqat index.js ni ignor qilish
+!api/index.js
+
 # production
 /build
 

@@ -8,7 +8,7 @@ import { createData, downloadDistrictZip, getAllDistricts } from '../../../api/s
 
 const { Option } = Select;
 
-function FileManagement() {
+function SprinterTable() {
     const [sprinters, setSprinters] = useState([]);
     const [loading, setLoading] = useState(false);
     const [expandedRowKeys, setExpandedRowKeys] = useState([]);
@@ -45,13 +45,12 @@ function FileManagement() {
 
     const handleViewMasters = (record) => {
         // Masalan, yangi modalni ochish va masterlar ro'yxatini ko'rsatish
-        console.log(record.mantiors);
         Modal.info({
             title: 'Biriktrilgan Masterlar Ro\'yxati',
             content: (
                 <Table
                     columns={columnsUsers} // `customerColumns` ni kerakli kolonalar bilan almashtiring
-                    dataSource={record.mantiors} // `record.masters` to'g'ri ma'lumot manzilini ko'rsating
+                    dataSource={record?.mantiors} // `record.masters` to'g'ri ma'lumot manzilini ko'rsating
                     rowKey="id"
                     pagination={false}
                     size="small"
@@ -349,12 +348,5 @@ function FileManagement() {
     );
 }
 
-export default FileManagement;
-
-
-
-
-
-
-
+export default SprinterTable;
 

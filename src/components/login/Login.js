@@ -3,15 +3,15 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 import { Form, Input, Button, message } from "antd";
-import useCRUD from "../../hooks/useCRUD"; // `useCRUD` hookni import qiling
+import { signIn } from "../../api/superAdminAPI"; // `useCRUD` hookni import qiling
 import "./style.css";
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [id, setId] = useState(null);
-  const { signIn, loading, error } = useCRUD("/auth/login"); // API endpoint
   const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
 
 
   // URL dan ID ni olish
@@ -23,15 +23,19 @@ const Login = () => {
     }
   }, [location.search]);
 
+
   const onFinish = async (values) => {
+    setLoading(true);
+
     // Telefon raqamini formatlash
     const formattedPhoneNumber = values.phone_number.replace("+", "");
     values.phone_number = formattedPhoneNumber;
 
-
     try {
+      // Kirish funksiyasini chaqiramiz
       const response = await signIn(values);
-      console.log(response);
+
+      // Foydalanuvchining rolini tekshiramiz
       if (response?.result?.role?.name === "admin") {
         // Admin uchun navigatsiya
         navigate("/fileManagement");
@@ -45,10 +49,14 @@ const Login = () => {
       }
     } catch (err) {
       // Xatolikni qayta ishlash
-      const errorMessage = err?.response?.data?.result || "Noma'lum xatolik yuz berdi";
+      const errorMessage = "Login jarayonida xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.";
       message.error(errorMessage);
+    } finally {
+      // Yuklanishni tugatish
+      setLoading(false);
     }
   };
+
 
   return (
     <div className="login_BODY">

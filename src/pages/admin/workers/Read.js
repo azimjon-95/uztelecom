@@ -1,237 +1,311 @@
-import React, { useEffect, useState } from "react";
-import { Table, Button, Form, Input, Modal, Select, Col, message } from "antd";
-import { useLocation } from "react-router-dom";
-import useCRUD from "../../../hooks/useCRUD";
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import axios from '../../../api';
-import "./style.css";
-import CustomLayout from "../../../components/layout/Layout";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import React, { useEffect, useState } from 'react';
+import { Table, Button, Modal, Input, Form, Select, message } from 'antd';
+import { ArrowLeftOutlined, EditOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import CustomLayout from '../../../components/layout/Layout';
+import {
+  getUsers,
+  getAllDistricts,
+  createUser,
+  getRoles,
+  deleteUser,
+  updateUser, // Import `updateUser` function
+} from '../../../api/superAdminAPI';
+import './style.css'
+const { Option } = Select;
 
-const Read = () => {
-  const { data, loading, fetchData } = useCRUD("/user/get");
-  const [openBox, setOpenBox] = useState(false);
-  const location = useLocation();
+function Read() {
   const [form] = Form.useForm();
-  const currentUser = location.state?.currentUser || null;
-  const [isEdit, setIsEdit] = useState(false); // State for edit mode
-  useEffect(() => {
-    if (isEdit) {
-      form.setFieldsValue(currentUser);
-      setIsEdit(true); // Set edit mode to true
-      setOpenBox(true);
-    }
-  }, [isEdit, currentUser, form]);
+  const [openBox, setOpenBox] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [data, setData] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+
 
   useEffect(() => {
-    fetchData();
+    fetchUsers();
+    fetchDistricts();
+    fetchRoles();
   }, []);
 
-
-  const onFinish = async (values) => {
+  const fetchUsers = async () => {
     try {
-      // Remove "+" from phone_number
-      const formattedValues = {
-        ...values,
-        phone_number: values.phone_number.replace("+", "")
-      };
-
-      // Set your token here
-      const token = localStorage.getItem("token"); // Replace with your actual token
-
-      // Make the API call based on `isEdit`
-      const response = isEdit
-        ? await axios.put(`/users/${currentUser.id}`, formattedValues, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        : await axios.post('/auth/register', formattedValues, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-      // Handle successful response
-      if (response?.data?.result) {
-        message.success(isEdit ? "Ma'lumotlar muvaffaqiyatli yangilandi!" : "Foydalanuvchi muvaffaqiyatli qo'shildi!");
-        setOpenBox(false); // Close the form box
-        form.resetFields(); // Reset the form
-        fetchData(); // Refresh the data
-      } else {
-        // If no result, throw an error
-        throw new Error(response?.data?.message || "Xatolik yuz berdi!");
-      }
+      setLoading(true);
+      const response = await getUsers();
+      setData(response?.data?.result || []);
+      setFilteredData(response?.data?.result || []);
     } catch (error) {
-      // Handle and display error messages
-      message.error(error?.response?.data?.message || error.message || "Xatolik yuz berdi!");
+      message.error('Foydalanuvchilarni olishda xatolik yuz berdi');
+    } finally {
+      setLoading(false);
     }
   };
 
-
-  const handleBack = () => {
-    setOpenBox(false);
-    form.resetFields();
-    setIsEdit(false); // Reset edit mode on back
+  const fetchDistricts = async () => {
+    try {
+      const response = await getAllDistricts();
+      setDistricts(response?.data || []);
+    } catch (error) {
+      message.error('Tumanlarni olishda xatolik yuz berdi');
+    }
   };
 
-  const handleEdit = (record) => {
-    form.setFieldsValue(record);
-    setIsEdit(true); // Set edit mode to true
-    setOpenBox(true);
+  const fetchRoles = async () => {
+    try {
+      const response = await getRoles();
+      setRoles(response?.data || []);
+    } catch (error) {
+      message.error('Rollarni olishda xatolik yuz berdi');
+    }
   };
 
-  const { confirm } = Modal;
+  const handleCreateUser = async (values) => {
+    try {
+      await createUser(values);
+      message.success('User muvaffaqiyatli yaratildi');
+      form.resetFields();
+      setOpenBox(false);
+      fetchUsers();
+    } catch (error) {
+      message.error('User yaratishda xatolik yuz berdi');
+    }
+  };
 
-  const handleDelete = (record) => {
-    confirm({
-      title: 'Ishonchingiz komilmi?',
-      content: `Siz ${record.full_name} foydalanuvchisini o'chirishni xohlaysizmi?`,
-      okText: 'Ha',
-      cancelText: "Yo'q",
-      onOk: async () => {
-        try {
-          await axios.delete(`https://api.uztelecom.dadabayev.uz/api/delete/user/${record.id}`);
-          message.success("Foydalanuvchi muvaffaqiyatli o'chirildi");
-          // Reload or update the data after deletion
-        } catch (error) {
-          message.error("Foydalanuvchini o'chirishda xatolik yuz berdi");
-        }
+  const handleUpdateUser = async (values) => {
+    console.log(values);
+    try {
+      if (currentUser) {
+        await updateUser({ ...values, id: currentUser.id });
+        message.success('Foydalanuvchi muvaffaqiyatli yangilandi');
+        form.resetFields();
+        setOpenBox(false);
+        fetchUsers();
+      }
+    } catch (error) {
+      message.error('Foydalanuvchini yangilashda xatolik yuz berdi');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      setLoading(true);
+      await deleteUser(id);
+      message.success("Foydalanuvchi muvaffaqiyatli o'chirildi");
+      setData((prevData) => prevData.filter((item) => item.id !== id));
+    } catch (error) {
+      message.error("Foydalanuvchini o'chirishda xatolik yuz berdi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const showDeleteConfirm = (id) => {
+    Modal.confirm({
+      title: "Foydalanuvchini o'chirishni tasdiqlaysizmi?",
+      content: "Bu amal qaytarilmaydi, o'chirilgan foydalanuvchi ma'lumotlari qayta tiklanmaydi.",
+      okText: "Ha, o'chirish",
+      okType: "danger",
+      cancelText: "Bekor qilish",
+      onOk() {
+        handleDelete(id);
       },
       onCancel() {
-        console.log('Bekor qilindi');
+        console.log("O'chirish bekor qilindi");
       },
     });
   };
-
 
   const columns = [
     { title: "ID", dataIndex: "id", key: "id" },
     { title: "Ism / Familiya", dataIndex: "full_name", key: "full_name" },
     { title: "Telefon raqam", dataIndex: "phone_number", key: "phone_number" },
-    { title: "Role", dataIndex: "role", key: "role", render: (e) => e.name },
+    {
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+      render: (role) => {
+        if (role.name === "super_admin") return "Super Admin";
+        if (role.name === "admin") return "Admin";
+        if (role.name === "user") return "Hodim";
+        return role.name;
+      },
+    },
     {
       title: "Tahrirlash",
       key: "action",
       render: (text, record) => (
-        <>
-          <Button
-            onClick={() => handleEdit(record)}
-            type="primary"
-            style={{ marginRight: 8 }}
-          >
-            <EditOutlined />
-          </Button>
-        </>
+        <Button
+          type="primary"
+          style={{ marginRight: 8 }}
+          onClick={() => {
+            setCurrentUser(record);
+            form.setFieldsValue({
+              full_name: record.full_name,
+              phone_number: record.phone_number,
+              role_id: record.role.id,
+              district_id: record.district_id || '',
+            });
+            setIsEdit(true);
+            setOpenBox(true);
+          }}
+        >
+          <EditOutlined />
+        </Button>
       ),
     },
-    // {
-    //   title: "O'chirish",
-    //   key: "action",
-    //   render: (text, record) => (
-    //     <>
-    //       <Button
-    //         onClick={() => handleDelete(record)}
-    //         type="primary"
-    //         danger
-    //         style={{ marginRight: 8 }}
-    //       >
-    //         <DeleteOutlined />
-    //       </Button>
-    //     </>
-    //   ),
-    // },
+    {
+      title: "O'chirish",
+      key: "action",
+      render: (text, record) => (
+        <Button type="danger" onClick={() => showDeleteConfirm(record.id)}>
+          <DeleteOutlined />
+        </Button>
+      ),
+    },
   ];
+
+  const handleRoleChange = (value) => {
+    handleRoleFilter(value);
+  };
+
+  const handleRoleFilter = (roleId) => {
+    const filtered = data.filter((user) => user.role.id === roleId);
+    setFilteredData(filtered);
+  };
+
+  const handleBack = () => {
+    setOpenBox(false);
+    form.resetFields();
+    setIsEdit(false);
+    setCurrentUser(null);
+  };
 
   return (
     <CustomLayout>
-      <h2 style={{ textAlign: "center", color: "gray", lineHeight: "30px", marginTop: "10px" }}>
-        Ishchilar Ro'yxati
-      </h2>
-      <div style={{ width: "100%", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-        <Button type="primary" onClick={() => {
-          setIsEdit(false); // Set edit mode to false for new user
-          setOpenBox(true);
-        }} style={{ marginBottom: 16 }}>
-          Foydalanuvchi Qo'shish
-        </Button>
-      </div>
-      <Table
-        pagination={false}
-        size="small"
-        columns={columns}
-        dataSource={data?.data?.result}
-        rowKey="id"
-        loading={loading}
-        bordered
-        scroll={{ y: 500 }} // Yoki sizga kerakli balandlikda
-      />
-      {openBox && (
-        <div className="edi_banner">
-          <Form form={form} layout="vertical" onFinish={onFinish}>
-            <h2 style={{ textAlign: "center", color: "gray", lineHeight: "30px", marginTop: "10px" }}>
+      <div style={{ width: "100%", height: "98vh", position: "relative", overflow: "hidden" }}>
+        <h2 style={{ textAlign: 'center', color: 'gray', marginTop: '10px' }}>Super Admin Paneli</h2>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+          <Select
+            placeholder="Rolni tanlang"
+            onChange={handleRoleChange}
+            style={{ width: 200 }}
+          >
+            {/* {roles?.result?.map((role) => ( */}
+            {roles?.result
+              ?.filter((role) => role.name !== 'super_admin') // "super_admin" ni chiqarib tashlaymiz
+              .map((role) => (
+                <Select.Option key={role.id} value={role.id}>
+                  {{
+                    super_admin: "Super Admin",
+                    admin: "Admin",
+                    user: "Hodimlar",
+                  }[role.name] || role.name}
+                </Select.Option>
+              ))}
+          </Select>
+
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              setIsEdit(false);
+              setOpenBox(true);
+            }}
+          >
+            Foydalanuvchi Qo'shish
+          </Button>
+        </div>
+        <Table
+          pagination={false}
+          size="small"
+          columns={columns}
+          dataSource={filteredData?.filter((user) => user.role.name !== 'super_admin')} // Faqat "super_admin" emaslarni ko'rsatamiz
+          rowKey="id"
+          loading={loading}
+          bordered
+          scroll={{ y: 500 }}
+        />
+
+
+
+        <div className={`${openBox ? 'edi_banner' : 'edi_banner-block'}`}>
+          <Form form={form} onFinish={isEdit ? handleUpdateUser : handleCreateUser} layout="vertical">
+            <h2 style={{ textAlign: 'center', color: 'gray', marginTop: '10px' }}>
               {isEdit ? "Ma'lumotlarni yangilash" : "Ishchilarni Qabul qilish"}
             </h2>
-            <Col style={{ width: "100%" }}>
-              <Form.Item style={{ width: "100%" }}
-                name="full_name"
-                label="Ism"
-                rules={[{ required: true, message: "Ism va Familiya kiriting!" }]}
-              >
-                <Input style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-            <Col style={{ width: "100%" }}>
-              <Form.Item style={{ width: "100%" }}
-                name="phone_number"
-                label="Telefon raqam"
-                rules={[{ required: true, message: "Telefon raqam kiriting!" }]}
-              >
-                <Input style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-            <Col style={{ width: "100%" }}>
-              <Form.Item style={{ width: "100%" }}
-                name="password"
-                label="Password"
-                rules={[{ required: !isEdit, message: "Parol kiriting!" }]}
-              >
-                <Input.Password disabled={isEdit} />
-              </Form.Item>
-            </Col>
-            <Col>
-              <Form.Item
-                label="Role"
-                name="role"
-                rules={[{ required: true, message: "Role kiriting!" }]}
-              >
-                <Select
-                  options={[
-                    { value: "admin", label: "Admin" },
-                    { value: "user", label: "User" },
-                  ]}
-                />
-              </Form.Item>
-            </Col>
-            <div style={{ width: "100%", display: "flex", gap: "5px" }}>
-              <Button style={{ width: "100%" }} type="primary" htmlType="submit">
-                {isEdit ? "Yangilash" : "Roʻyxatdan oʻtish"}
+            <Form.Item
+              name="full_name"
+              label="To'liq Ism"
+              rules={[{ required: true, message: 'To\'liq ismni kiriting' }]}
+            >
+              <Input placeholder="To'liq Ism" />
+            </Form.Item>
+            <Form.Item
+              name="phone_number"
+              label="Telefon Raqam"
+              rules={[{ required: true, message: 'Telefon raqamni kiriting' }]}
+            >
+              <Input placeholder="Telefon Raqam" />
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              label="Parol"
+              rules={[{ required: true, message: 'Parolni kiriting' }]}
+            >
+              <Input placeholder="Parol" />
+            </Form.Item>
+
+            <Form.Item
+              name="role_id"
+              label="Rol"
+              rules={[{ required: true, message: 'Rolni tanlang' }]}
+            >
+              <Select placeholder="Rolni tanlang">
+                {roles?.result?.map((role) => (
+                  <Option key={role.id} value={role.id}>
+                    {role.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="district_id"
+              label="Tuman"
+              rules={[{ required: true, message: 'Tumanni tanlang' }]}
+            >
+              <Select placeholder="Tumanni tanlang">
+                {districts.result?.map((district) => (
+                  <Select.Option key={district.id} value={district.id}>
+                    {district.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {isEdit ? 'Yangilash' : 'Qo\'shish'}
               </Button>
-              <Button
-                type="default"
-                icon={<ArrowLeftOutlined />}
-                onClick={handleBack}
-                style={{ marginLeft: 8 }}
-              >
-                Orqaga
+              <Button style={{ marginLeft: 8 }} onClick={handleBack}>
+                <ArrowLeftOutlined /> Ortga
               </Button>
-            </div>
+            </Form.Item>
           </Form>
         </div>
-      )}
+      </div>
     </CustomLayout>
   );
-};
+}
+
+
 
 export default Read;
+
+
 

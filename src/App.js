@@ -4,11 +4,12 @@ import "antd/dist/reset.css";
 import { Button, Result } from 'antd';
 import Login from "./components/login/Login";
 import Read from "./pages/admin/workers/Read";
-import AddForm from "./pages/admin/workers/Add";
 import ScanPage from "./pages/workers/ScanPage";
 import FileManagement from "./pages/admin/adminPanel/AdminPanel";
+import SuperAdminPanel from "./pages/superadmin/SuperAdminPanel"; // SuperAdmin panelini import qilish
 import "./index.css";
 import Abonents from "./pages/workers/AllAbonents";
+import SprinterTable from "./pages/superadmin/sprinters/Sprinters";
 
 const App = () => {
   const [role, setRole] = useState(null);
@@ -25,6 +26,7 @@ const App = () => {
 
   const isAdmin = role === "admin";
   const isUser = role === "user";
+  const isSuperAdmin = role === "super_admin"; // SuperAdmin rolini aniqlash
 
   return (
     <Routes>
@@ -32,7 +34,6 @@ const App = () => {
       {isAdmin && (
         <>
           <Route path="/fileManagement" element={<FileManagement />} />
-          <Route path="/addForm" element={<AddForm />} />
           <Route path="/workers" element={<Read />} />
           <Route path="/" element={<FileManagement />} />
         </>
@@ -41,6 +42,13 @@ const App = () => {
         <>
           <Route path="/scan/:id" element={<ScanPage />} />
           <Route path="/" element={<Abonents />} />
+        </>
+      )}
+      {isSuperAdmin && (
+        <>
+          <Route path="/superAdminPanel" element={<SuperAdminPanel />} /> {/* SuperAdmin sahifasi */}
+          <Route path="/sprinters" element={<SprinterTable />} /> {/* SuperAdmin sahifasi */}
+          <Route path="/" element={<SuperAdminPanel />} /> {/* Asosiy sahifa super adminlar uchun */}
         </>
       )}
       <Route path="*" element={

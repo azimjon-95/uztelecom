@@ -1,8 +1,13 @@
-
 import axios from "axios";
 
-const mainURL = axios.create({
-  baseURL: "https://api.uztelicom.dadabayev.uz/api",
+const api = axios.create({
+  baseURL: 'https://api.uztelecom.dadabayev.uz/api',
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem("token")}`
+  }
 });
 
-export default mainURL;
+export default api;
+
+
+

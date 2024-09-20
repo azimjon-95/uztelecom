@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import './scanPage.css'; // Import the CSS file for styling
-import axios from 'axios';
+import api from '../../api/index';
 
 function ScanPage() {
     const navigate = useNavigate();
@@ -30,13 +30,7 @@ function ScanPage() {
     const fetchFileData = async (fileId) => {
         setLoading(true);
         try {
-            const response = await axios.get(`https://api.uztelecom.dadabayev.uz/api/file/shows/${fileId}`, {
-                // const response = await axios.get(`https://api.uztelecom.dadabayev.uz/api/file/show/${fileId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
+            const response = await api.get(`/spirinter/show/${fileId}`);
             const data = response?.data?.result;
 
             // Agar `path` maydoni mavjud bo'lsa va string bo'lsa, uni JSON.parse orqali arrayga o'zgartirish

@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
     UserOutlined,
     TeamOutlined,
-    LogoutOutlined
+    LogoutOutlined,
+    DashboardOutlined,
 } from '@ant-design/icons';
-import { Layout, Menu, Modal } from 'antd'; // Modal import qiling
+
+import { Layout, Menu, Modal } from 'antd';
 import './style.css';
 import logoOne from '../../assets/logo.svg';
 import logoTwo from '../../assets/logoTwo.png';
@@ -17,7 +19,7 @@ const CustomLayout = ({ children }) => {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [activeItem, setActiveItem] = useState(null);
     const role = localStorage.getItem('role');
-    const [modalVisible, setModalVisible] = useState(false); // Modal ko'rsatish holatini saqlash uchun
+    const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         const handleResize = () => {
@@ -49,6 +51,10 @@ const CustomLayout = ({ children }) => {
         setModalVisible(false);
     };
 
+    const isAdmin = role === 'admin';
+    // const isUser = role === 'user';
+    const isSuperAdmin = role === 'super_admin';
+
     const menuItems = [
         { key: '1', icon: <UserOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/fileManagement">Fayl boshqaruvi</Link> },
         { key: '2', icon: <TeamOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/workers">Hodimlar</Link> },
@@ -60,6 +66,24 @@ const CustomLayout = ({ children }) => {
         { key: 'logout', icon: <LogoutOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />, label: <span style={{ color: "#fff" }}>Tizimdan chiqish</span>, onClick: showLogoutModal }
     ];
 
+    const menuSuperAdmin = [
+        {
+            key: '1',
+            icon: <DashboardOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />,
+            label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/superAdminPanel">Super Admin Panel</Link>
+        },
+        {
+            key: '3',
+            icon: <TeamOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />,
+            label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/sprinters">Sprinterlar</Link>
+        },
+        {
+            key: 'logout',
+            icon: <LogoutOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />,
+            label: <span style={{ color: "#fff" }}>Tizimdan chiqish</span>,
+            onClick: showLogoutModal
+        }
+    ];
 
     const handleMenuClick = (item) => {
         if (item.key === 'logout') {
@@ -98,6 +122,7 @@ const CustomLayout = ({ children }) => {
     const toggleCollapse = () => {
         setCollapsed(!collapsed);
     };
+
     return (
         <Layout style={{ minHeight: '100vh', overflow: "hidden", background: "#e1e1e1" }}>
             <Sider style={{ background: "#03B4FF" }} onCollapse={toggleCollapse} collapsible collapsed={collapsed} className={`custom-sider ${collapsed ? 'ant-layout-sider-collapsed' : ''}`}>
@@ -106,7 +131,7 @@ const CustomLayout = ({ children }) => {
                     <img width={collapsed ? 40 : 180} src={collapsed ? logoTwo : logoOne} alt="Logo" />
                 </div>
                 <Menu style={{ background: "#03B4FF" }} mode="inline"
-                    items={role === 'admin' ? menuItems : menuTeacher}
+                    items={isSuperAdmin ? menuSuperAdmin : (isAdmin ? menuItems : menuTeacher)}
                     onClick={({ key }) => handleMenuClick({ key })}
                 />
             </Sider>
@@ -128,9 +153,9 @@ const CustomLayout = ({ children }) => {
 
             {isMobile && (
                 <div ref={menuRef} className='MenuMobile menu-horizontal'>
-                    {role === 'owner'
-                        ? renderMobileMenuItems(menuItems)
-                        : renderMobileMenuItems(menuTeacher)
+                    {isSuperAdmin
+                        ? renderMobileMenuItems(menuSuperAdmin)
+                        : (isAdmin ? renderMobileMenuItems(menuItems) : renderMobileMenuItems(menuTeacher))
                     }
                 </div>
             )}
@@ -145,8 +170,6 @@ const CustomLayout = ({ children }) => {
             >
                 <p>Chiqmoqchimisiz?</p>
             </Modal>
-
-
         </Layout>
     );
 };
@@ -157,99 +180,3 @@ export default CustomLayout;
 
 
 
-
-
-
-
-
-
-
-// const Sidebar = ({ role, collapsed }) => {
-//     const navigate = useNavigate();
-//     const location = useLocation();
-//     const [isModalVisible, setIsModalVisible] = React.useState(false);
-
-//     const showModal = () => {
-//         setIsModalVisible(true);
-//     };
-
-//     const handleOk = () => {
-//         localStorage.removeItem('role');
-//         setIsModalVisible(false);
-//         window.location.href = '/login';
-//     };
-
-//     const handleCancel = () => {
-//         setIsModalVisible(false);
-//     };
-
-//     const handleClick = (e) => {
-//         if (e.key === 'logout') {
-//             showModal();
-//         } else {
-//             navigate(e.key);
-//         }
-//     };
-
-//     return (
-//         <>
-//             <Menu
-//                 selectedKeys={[location.pathname]}
-//                 mode="inline"
-//                 onClick={handleClick}
-//                 style={{ backgroundColor: '#e1e1e1' }}
-//             >
-//                 <div className="logo">
-//                     <img width={collapsed ? 38 : 150} src={collapsed ? logoTwo : logoOne} alt="" />
-//                 </div>
-
-//                 {role === 'admin' ? (
-//                     <>
-//                         <Menu.Item key="/admin" icon={<SettingOutlined />}>
-//                             Admin Panel
-//                         </Menu.Item>
-//                         <Menu.Item key="/read/workers" icon={<TeamOutlined />}>
-//                             Hodimlar
-//                         </Menu.Item>
-//                     </>
-//                 ) : (
-//                     <>
-//                         <Menu.Item key="/abonents" icon={<UserOutlined />}>
-//                             Abonentlar
-//                         </Menu.Item>
-//                         <Menu.Item key="/register/abonent" icon={<UserAddOutlined />}>
-//                             Ro'yhatga olish
-//                         </Menu.Item>
-//                         <Menu.Item key="/read/barcode" icon={<BarcodeOutlined />}>
-//                             Barcode o'qish
-//                         </Menu.Item>
-//                     </>
-//                 )}
-//                 <Menu.Item key="logout" icon={<LogoutOutlined />}>
-//                     Logout
-//                 </Menu.Item>
-//             </Menu>
-//             <Modal
-//                 title="Chiqish"
-//                 open={isModalVisible}
-//                 onOk={handleOk}
-//                 onCancel={handleCancel}
-//                 okText="OK"
-//                 cancelText="Bekor qilish"
-//             >
-//                 <p>Siz haqiqatdan ham chiqmoqchimisiz?</p>
-//             </Modal>
-//         </>
-//     );
-// };
-
-// export default Sidebar;
-
-
-
-
-// style={{ backgroundColor: '#e1e1e1' }}
-//             >
-//                 <div className="logo">
-//                     <img width={collapsed ? 38 : 150} src={collapsed ? logoTwo : logoOne} alt="" />
-//                 </div>

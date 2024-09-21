@@ -1,3 +1,4 @@
+// eslint-disable-next-line 
 import React, { useEffect, useState } from 'react';
 import axios from '../../api';
 import './scanPage.css'; // Import the CSS file for styling
@@ -6,28 +7,36 @@ import CustomLayout from '../../components/layout/Layout';
 function Abonents() {
     const [fileData, setFileData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const id = localStorage.getItem("token")
-    const [dataFile, setFileContent] = useState([]);
-    const response = dataFile?.filter((i) => i.id === id);
 
     useEffect(() => {
+        const source = axios.CancelToken.source(); // Create a cancel token
+
         const fetchUserDataFile = async () => {
             setLoading(true);
             try {
                 const response = await axios.get('/file/get-all', {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`
-                    }
-                })
-                console.log(response);
-                setFileContent(response?.data?.result);
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                    cancelToken: source.token, // Attach the cancel token to the request
+                });
+                setFileData(response?.data?.result || []); // Ensure empty array fallback if no data
             } catch (error) {
-                console.error("Faylni olishda xato yuz berdi:", error);
+                if (axios.isCancel(error)) {
+                    console.log('Request canceled', error.message);
+                } else {
+                    console.error("Faylni olishda xato yuz berdi:", error);
+                }
             } finally {
                 setLoading(false);
             }
         };
+
         fetchUserDataFile();
+
+        return () => {
+            source.cancel('Component unmounted, request canceled'); // Cancel the request if component unmounts
+        };
     }, []);
 
 

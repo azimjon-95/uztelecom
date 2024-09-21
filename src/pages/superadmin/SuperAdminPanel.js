@@ -279,7 +279,7 @@ function SuperAdminPanel() {
                             <Form.Item
                                 name="district_id"
                                 label="Tuman"
-                                rules={[{ required: true, message: 'Tumanni tanlang' }]}
+                                rules={[{ required: false, message: 'Tumanni tanlang' }]}
                             >
                                 <Select placeholder="Tumanni tanlang">
                                     {districts.result?.map((district) => (

@@ -11,6 +11,7 @@ import {
     updateUser, // Import `updateUser` function
 } from '../../api/superAdminAPI';
 const { Option } = Select;
+const { Search } = Input;
 
 function SuperAdminPanel() {
     const [form] = Form.useForm();
@@ -23,6 +24,7 @@ function SuperAdminPanel() {
     const [filteredData, setFilteredData] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [rolesValue, setRolesValue] = useState(null);
+    const [searchValue, setSearchValue] = useState("");
 
     useEffect(() => {
         fetchUsers();
@@ -134,6 +136,13 @@ function SuperAdminPanel() {
             },
         },
         {
+            title: "Tumani", dataIndex: "district", key: "district",
+            render: (district) => {
+                return district.name;
+            },
+        },
+
+        {
             title: "Tahrirlash",
             key: "action",
             render: (text, record) => (
@@ -168,8 +177,11 @@ function SuperAdminPanel() {
     ];
 
     const handleRoleChange = (value) => {
-        console.log('Selected Role Value:', value); // Add this line
-        handleRoleFilter(value);
+        if (value === "all") {
+            setFilteredData(data); // Agar "Barchasi" tanlansa, barcha userlarni ko'rsatish
+        } else {
+            handleRoleFilter(value); // Muayyan rol asosida filtrlash
+        }
     };
 
     const handleRoleFilter = (roleId) => {
@@ -185,7 +197,16 @@ function SuperAdminPanel() {
         setCurrentUser(null);
     };
 
+    // Qidirish funksiyasi
+    const handleSearchInput = (value) => {
+        setSearchValue(value.toLowerCase()); // Qidirilayotgan qiymatni saqlash
+    };
 
+    // Sprinters ma'lumotlarini qidirishdan so'ng filtrlaymiz
+    const filteredSprinters = filteredData?.filter((sprinter) =>
+        sprinter.full_name?.toLowerCase().includes(searchValue) // 'technical_data' ichida 'searchValue' qiymatini qidirish
+    );
+    console.log(filteredSprinters);
     return (
         <CustomLayout>
             <div style={{ width: "100%", height: "98vh", position: "relative", overflow: "hidden" }}>
@@ -196,7 +217,11 @@ function SuperAdminPanel() {
                         placeholder="Rolni tanlang"
                         onChange={handleRoleChange}
                         style={{ width: 200 }}
+                    // defaultValue="all"  // Sukut bo‘yicha "Barchasi" tanlanadi
                     >
+                        <Select.Option key="all" value="all">
+                            Barchasi
+                        </Select.Option>
                         {roles?.result?.map((role) => (
                             <Select.Option key={role.id} value={role.id}>
                                 {{
@@ -207,6 +232,14 @@ function SuperAdminPanel() {
                             </Select.Option>
                         ))}
                     </Select>
+
+                    {/* // search */}
+                    <Search
+                        value={searchValue}
+                        onChange={(e) => handleSearchInput(e.target.value)}
+                        placeholder="Hodimlarni ism familyasi bo'yicha qidirish..."
+                        style={{ width: 450 }}
+                    />
 
                     <Button
                         type="primary"
@@ -223,7 +256,7 @@ function SuperAdminPanel() {
                     pagination={false}
                     size="small"
                     columns={columns}
-                    dataSource={filteredData}
+                    dataSource={filteredSprinters}
                     rowKey="id"
                     loading={loading}
                     bordered
@@ -306,4 +339,8 @@ function SuperAdminPanel() {
 }
 
 export default SuperAdminPanel;
+
+
+
+
 

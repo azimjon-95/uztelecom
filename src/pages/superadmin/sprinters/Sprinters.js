@@ -4,14 +4,16 @@ import { UploadOutlined, PlusOutlined, DeleteOutlined, DownloadOutlined, SearchO
 import { getSprinters, addUserToSprinter, deleteUserFromSprinter } from '../../../api/spirinterAPI';
 import CustomLayout from '../../../components/layout/Layout';
 import * as XLSX from 'xlsx';
-import { createData, downloadDistrictZip, getAllDistricts } from '../../../api/superAdminAPI';
+import { createData, downloadDistrictZip, getAllDistricts, getUsers } from '../../../api/superAdminAPI';
 
 const { Option } = Select;
+const { Search } = Input;
 
 function SprinterTable() {
     const [sprinters, setSprinters] = useState([]);
     const [loading, setLoading] = useState(false);
     const [expandedRowKeys, setExpandedRowKeys] = useState([]);
+    // const [selectedSprinterDel, setSelectedSprinterDel] = useState(null);
     const [selectedSprinter, setSelectedSprinter] = useState(null);
     const [userIds, setUserIds] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
@@ -19,12 +21,32 @@ function SprinterTable() {
     const [data, setData] = useState([]);
     const [column, setColumns] = useState([]);
     const [selectedDistrict, setSelectedDistrict] = useState(null);
+    const [selectedDistrictDel, setSelectedSprinterDel] = useState(null);
     const [districts, setDistricts] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [searchValue, setSearchValue] = useState("");
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState(null);
+
 
     useEffect(() => {
         fetchDistricts();
         fetchSprinters();
+        fetchUsers();
     }, []);
+
+
+    const fetchUsers = async () => {
+        try {
+            setLoading(true);
+            const response = await getUsers();
+            setFilteredUsers(response?.data?.result?.filter((i) => i.role.name === "user") || []);
+        } catch (error) {
+            message.error('Foydalanuvchilarni olishda xatolik yuz berdi');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchSprinters = async () => {
         setLoading(true);
@@ -74,14 +96,19 @@ function SprinterTable() {
 
     const handleDeleteUser = async () => {
         try {
-            await deleteUserFromSprinter(selectedSprinter.id, userIds);
-            message.success('Foydalanuvchi sprinterdan olib tashlandi');
-            setModalVisible(false);
+            if (selectedUserId && selectedDistrictDel?.id) {
+                await deleteUserFromSprinter(selectedDistrictDel.id, [selectedUserId]);
+                message.success('Foydalanuvchi sprinterdan olib tashlandi');
+                setDeleteModalVisible(false);
+                setSelectedSprinterDel(null);
+                fetchSprinters(); // Malumotlar yangilansin
+            } else {
+                message.warning('Iltimos foydalanuvchini tanlang');
+            }
         } catch (error) {
             message.error('Foydalanuvchini olib tashlashda xatolik yuz berdi');
         }
     };
-
     const handleExpand = (expanded, record) => {
         if (expanded) {
             setExpandedRowKeys([record.id]);
@@ -133,15 +160,14 @@ function SprinterTable() {
         },
         {
             title: 'Masterni bekor qilish',
-            key: 'actions',
+            key: 'delete_action',
             render: (text, record) => (
                 <Button
                     type="danger"
                     icon={<DeleteOutlined />}
                     onClick={() => {
-                        setSelectedSprinter(record);
-                        setActionType('delete');
-                        setModalVisible(true);
+                        setSelectedSprinterDel(record);
+                        setDeleteModalVisible(true);
                     }}
                 >
                     Foydalanuvchini Olib Tashlash
@@ -245,7 +271,15 @@ function SprinterTable() {
         }
     };
 
+    // Qidirish funksiyasi
+    const handleSearchInput = (value) => {
+        setSearchValue(value.toLowerCase()); // Qidirilayotgan qiymatni saqlash
+    };
 
+    // Sprinters ma'lumotlarini qidirishdan so'ng filtrlaymiz
+    const filteredSprinters = sprinters?.filter((sprinter) =>
+        sprinter.technical_data?.toLowerCase().includes(searchValue) // 'technical_data' ichida 'searchValue' qiymatini qidirish
+    );
 
     return (
         <CustomLayout>
@@ -272,6 +306,13 @@ function SprinterTable() {
                         </Button>
                     }
                 </div>
+                {/* // search */}
+                <Search
+                    value={searchValue}
+                    onChange={(e) => handleSearchInput(e.target.value)}
+                    placeholder="Sprinterni texnik ma'lumotlari bo'yicha qidirish..."
+                    style={{ width: 450 }}
+                />
                 {data.length > 0 ?
                     <Button onClick={sendDataToServer} type="primary" style={{ marginTop: 20 }}>Ma'lumotlarni Yuborish</Button>
                     :
@@ -308,7 +349,7 @@ function SprinterTable() {
             <div>
                 <Table
                     columns={sprinterColumns}
-                    dataSource={sprinters}
+                    dataSource={filteredSprinters}
                     rowKey="id"
                     size="small"
                     loading={loading}
@@ -338,10 +379,45 @@ function SprinterTable() {
                     onOk={actionType === 'add' ? handleAddUser : handleDeleteUser}
                     onCancel={() => setModalVisible(false)}
                 >
-                    <Input
-                        placeholder="Foydalanuvchi ID larini kiriting (vergul bilan ajratilgan)"
-                        onChange={(e) => setUserIds(e.target.value.split(','))}
-                    />
+                    <Select
+                        showSearch
+                        placeholder="Foydalanuvchini tanlang"
+                        optionFilterProp="children"
+                        onChange={(value) => setUserIds([value])} // Faqat bitta foydalanuvchi ID sini array shaklida saqlash
+                        filterOption={(input, option) =>
+                            option.children?.toLowerCase().indexOf(input?.toLowerCase()) >= 0
+                        }
+                        style={{ width: '100%' }}
+                    >
+                        {filteredUsers?.map((user) => (
+                            <Option key={user.id} value={user.id}>
+                                {user.full_name}
+                            </Option>
+                        ))}
+                    </Select>
+                </Modal>
+                <Modal
+                    title="Foydalanuvchini Olib Tashlash"
+                    open={deleteModalVisible}
+                    onOk={handleDeleteUser}
+                    onCancel={() => setDeleteModalVisible(false)}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Masterni tanlang"
+                        style={{ width: '100%' }}
+                        onChange={setSelectedUserId}
+                        optionFilterProp="children"
+                        filterOption={(input, option) =>
+                            option.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                    >
+                        {selectedDistrictDel?.mantiors?.map((master) => (
+                            <Option key={master.id} value={master.id}>
+                                {master.full_name}
+                            </Option>
+                        ))}
+                    </Select>
                 </Modal>
             </div>
         </CustomLayout>
@@ -349,4 +425,7 @@ function SprinterTable() {
 }
 
 export default SprinterTable;
+
+
+
 

@@ -1,120 +1,92 @@
+/* General Page Styles */
 .scan-page {
-    padding: 10px;
-    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f9f9f9;
+    /* Clean background */
 }
 
 .page-title {
     text-align: center;
     margin-bottom: 20px;
-    color: #333;
-}
-
-.loading-message {
-    text-align: center;
-    color: #555;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.data-table th,
-.data-table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-.data-table th {
-    background-color: #f4f4f4;
-    color: #333;
+    font-size: 24px;
     font-weight: bold;
+    color: #333;
 }
 
-.data-table tr:hover {
-    background-color: #f9f9f9;
-    transition: background-color 0.3s ease;
+/* Table Styles */
+.ant-table {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Soft shadow */
 }
 
-.error-message {
-    color: red;
+.ant-table th,
+.ant-table td {
     text-align: center;
+    padding: 10px;
 }
 
-/* Media queries for responsive design */
-@media (max-width: 1200px) {
+.ant-table th {
+    background-color: #f0f2f5;
+    font-weight: 600;
+    color: #333;
+}
 
-    .data-table th,
-    .data-table td {
+/* Responsive Adjustments for Small Screens */
+@media (max-width: 768px) {
+    .scan-page {
         padding: 10px;
     }
-}
 
-@media (max-width: 992px) {
-
-    .data-table th,
-    .data-table td {
-        padding: 8px;
+    .page-title {
+        font-size: 20px;
+        /* Smaller title */
     }
 
-    .data-table {
-        font-size: 14px;
-    }
-}
-
-@media (max-width: 768px) {
-    .data-table {
-        font-size: 12px;
+    .ant-table-wrapper {
+        overflow-x: auto;
+        /* Allow horizontal scrolling for smaller screens */
     }
 
-    .data-table th,
-    .data-table td {
-        display: block;
+    .ant-table {
+        table-layout: auto;
+        /* Flexible table layout to prevent content from being cut off */
         width: 100%;
-        box-sizing: border-box;
     }
 
-    .data-table th {
-        position: absolute;
-        top: 0;
-        left: 0;
-        background-color: #f4f4f4;
-        color: #333;
-        font-weight: bold;
-    }
-
-    .data-table td {
-        position: relative;
-        padding-left: 50%;
-        text-align: right;
-    }
-
-    .data-table td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 0;
-        width: 50%;
-        padding-left: 10px;
-        font-weight: bold;
-        text-align: left;
-        white-space: nowrap;
+    .ant-table th,
+    .ant-table td {
+        font-size: 12px;
+        /* Smaller text in table */
     }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 600px) {
     .page-title {
         font-size: 18px;
+        margin-bottom: 15px;
     }
 
-    .data-table {
-        font-size: 12px;
+    .ant-table th,
+    .ant-table td {
+        padding: 8px;
+        font-size: 11px;
     }
 
-    .data-table th,
-    .data-table td {
-        padding: 6px;
+    /* Horizontal scroll for tables if they don't fit */
+    .ant-table-wrapper {
+        overflow-x: scroll;
+    }
+
+    .ant-table {
+        table-layout: auto;
+        width: 100%;
+    }
+
+    .ant-table th,
+    .ant-table td {
+        word-wrap: break-word;
+        /* Prevent text from overflowing the table cells */
     }
 }

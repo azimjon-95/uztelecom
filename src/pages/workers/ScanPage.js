@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Table, Spin } from 'antd';
 import './scanPage.css'; // Import the CSS file for styling
 import api from '../../api/index';
 
@@ -9,7 +9,6 @@ function ScanPage() {
     const [fileData, setFileData] = useState([]);
     const { id } = useParams();
     const [loading, setLoading] = useState(false);
-
 
     useEffect(() => {
         if (!id) {
@@ -22,9 +21,7 @@ function ScanPage() {
                 fetchFileData(id);
             }
         }
-    }, [navigate]);
-
-
+    }, [navigate, id]);
 
     const fetchFileData = async (fileId) => {
         setLoading(true);
@@ -32,62 +29,96 @@ function ScanPage() {
             const response = await api.get(`/spirinter/show/${fileId}`);
             const data = response?.data?.result;
 
-            // Agar `path` maydoni mavjud bo'lsa va string bo'lsa, uni JSON.parse orqali arrayga o'zgartirish
-            if (data && data.path && typeof data.path === 'string') {
-                try {
-                    const parsedData = JSON.parse(data.path);  // JSON matnni arrayga aylantirish
-                    if (Array.isArray(parsedData)) {
-                        setFileData(parsedData);  // To'g'ri olingan arrayni setFileData ga o'rnatish
-                    } else {
-                        setFileData([]);  // Agar array emas bo'lsa, bo'sh array o'rnatamiz
-                        console.error('Expected an array but got something else:', parsedData);
-                    }
-                } catch (parseError) {
-                    console.error('Parsing error:', parseError);
-                    setFileData([]);  // Parsingda xatolik bo'lsa, bo'sh array
-                }
+            // Agar data obyekt bo'lsa, uni massivga aylantiramiz
+            if (data) {
+                setFileData(Array.isArray(data) ? data : [data]);  // Obyektni massivga aylantirish
             } else {
-                setFileData([]);  // Default bo'sh array
-                console.error('Expected a string but got something else:', data.path);
+                setFileData([]);  // Agar data bo'lmasa, bo'sh massivga o'rnatamiz
             }
-
         } catch (error) {
             console.error('Xatolik yuz berdi', error);
+            setFileData([]);  // Xato bo'lsa ham bo'sh massiv
         }
         setLoading(false);
     };
+    // Columns for the main table
+    const columns = [
+        {
+            title: 'Texnik Ma\'lumotlar',  // Uzbek title for technical_data
+            dataIndex: 'technical_data',
+            key: 'technical_data',
+        },
+        {
+            title: 'QR Kod',  // Uzbek title for qrCodeUrl
+            dataIndex: 'qrCodeUrl',
+            key: 'qrCodeUrl',
+            render: (text) => <a href={text} target="_blank" rel="noopener noreferrer">QR Ko'rish</a>,
+        },
+    ];
 
+    // Columns for the nested "customers" data
+    const customerColumns = [
+        {
+            title: 'Foydalanuvchi Login',  // Uzbek title for login
+            dataIndex: 'login',
+            key: 'login',
+        },
+        {
+            title: 'Ismi',  // Uzbek title for subscriber (name)
+            dataIndex: 'subscriber',
+            key: 'subscriber',
+        },
+        {
+            title: 'Manzil',  // Uzbek title for address
+            dataIndex: 'address',
+            key: 'address',
+        },
+        {
+            title: 'Shaxsiy Tekshiruv',  // Uzbek title for person_check
+            dataIndex: 'person_check',
+            key: 'person_check',
+        },
+        {
+            title: 'Port Raqami',  // Uzbek title for port_number
+            dataIndex: 'port_number',
+            key: 'port_number',
+        },
+    ];
 
-    // Get the headers from the first item in the fileData array
-    const headers = fileData.length > 0 ? Object.keys(fileData[0]) : [];
+    // Expanded row to show "customers" data
+    const expandableRowRender = (record) => {
+        const { customers } = record;
+        return (
+            <Table
+                columns={customerColumns}
+                dataSource={customers}
+                pagination={false}
+                rowKey={(customer) => customer.id} // Unique row key for Ant Design Table
+                scroll={{ x: '100%' }}  // Allow horizontal scroll if too wide
+            />
+        );
+    };
 
     return (
         <div className="scan-page">
             <h2 className="page-title">QR Kodni Skan Qilish Sahifasi</h2>
             {loading ? (
-                <p className="loading-message">Fayl ma'lumotlari yuklanmoqda...</p>
+                <Spin tip="Fayl ma'lumotlari yuklanmoqda..." />
             ) : (
-                <table className="data-table">
-                    <thead>
-                        <tr>
-                            {headers.map((header) => (
-                                <th key={header}>{header}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {fileData.map((item) => (
-                            <tr key={item.id}>
-                                {headers.map((header) => (
-                                    <td key={header}>{item[header]}</td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                <Table
+                    columns={columns}
+                    dataSource={fileData}
+                    expandable={{ expandedRowRender: expandableRowRender }}
+                    rowKey={(record) => record.id}  // Unique row key for main table
+                    scroll={{ x: '100%' }}  // Enable horizontal scroll for small screens
+                    pagination={false}
+                />
             )}
         </div>
     );
 }
 
 export default ScanPage;
+
+
+

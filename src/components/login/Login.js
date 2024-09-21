@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 import { Form, Input, Button, message } from "antd";
-import { signIn } from "../../api/superAdminAPI"; // `useCRUD` hookni import qiling
+import { signIn } from "../../api/superAdminAPI";
 import "./style.css";
 
 const Login = () => {
@@ -13,50 +13,39 @@ const Login = () => {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
-
-  // URL dan ID ni olish
+  // URL dan file_id ni olish
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const idFromUrl = queryParams.get('id');
+    const idFromUrl = queryParams.get('file_id'); // file_id ni olib keling
     if (idFromUrl) {
       setId(idFromUrl);
     }
   }, [location.search]);
 
 
+
   const onFinish = async (values) => {
     setLoading(true);
 
-    // Telefon raqamini formatlash
-    const formattedPhoneNumber = values.phone_number.replace("+", "");
-    values.phone_number = formattedPhoneNumber;
-
     try {
-      // Kirish funksiyasini chaqiramiz
-      const response = await signIn(values);
+      // Telefon raqamini formatlash (bo'shliqlarni olib tashlash va "+" belgisini almashtirish)
+      values.phone_number = values.phone_number.trim().replace("+", "");
 
-      // Foydalanuvchining rolini tekshiramiz
-      if (response?.result?.role?.name === "admin") {
-        // Admin uchun navigatsiya
-        navigate("/fileManagement");
+      const response = await signIn(values);
+      const userRole = response?.result?.role?.name;
+
+      // User roli tekshiruvi va navigatsiya
+      if (userRole === "admin" || userRole === "super_admin") {
+        navigate("/");
       } else {
-        // Oddiy foydalanuvchi yoki fayl skan qilish sahifasiga yo'naltirish
-        if (id) {
-          navigate(`/scan/${id}`);
-        } else {
-          navigate("/");
-        }
+        navigate(id ? `/scan/${id}` : "/");
       }
     } catch (err) {
-      // Xatolikni qayta ishlash
-      const errorMessage = "Login jarayonida xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.";
-      message.error(errorMessage);
+      message.error("Login jarayonida xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.");
     } finally {
-      // Yuklanishni tugatish
       setLoading(false);
     }
   };
-
 
   return (
     <div className="login_BODY">
@@ -72,12 +61,7 @@ const Login = () => {
             <div className="textbox">
               <Form.Item
                 name="phone_number"
-                rules={[
-                  {
-                    required: true,
-                    message: "Iltimos, Telefon raqamingizni kiriting!",
-                  },
-                ]}
+                rules={[{ required: true, message: "Iltimos, Telefon raqamingizni kiriting!" }]}
               >
                 <PhoneInput
                   defaultCountry="uz"
@@ -92,12 +76,7 @@ const Login = () => {
             <div className="textbox">
               <Form.Item
                 name="password"
-                rules={[
-                  {
-                    required: true,
-                    message: "Iltimos, Parolingizni kiriting!",
-                  },
-                ]}
+                rules={[{ required: true, message: "Iltimos, Parolingizni kiriting!" }]}
               >
                 <Input.Password placeholder="Parol" />
               </Form.Item>
@@ -105,11 +84,7 @@ const Login = () => {
 
             <Form.Item>
               <Button
-                style={{
-                  width: "100%",
-                  marginTop: "4px",
-                  backgroundColor: "#03B4FF",
-                }}
+                style={{ width: "100%", marginTop: "4px", backgroundColor: "#03B4FF" }}
                 type="primary"
                 htmlType="submit"
                 loading={loading}
@@ -125,3 +100,6 @@ const Login = () => {
 };
 
 export default Login;
+
+
+

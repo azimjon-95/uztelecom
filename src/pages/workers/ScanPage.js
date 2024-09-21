@@ -16,7 +16,6 @@ function ScanPage() {
             navigate('/');  // QR kodda file_id bo'lmasa bosh sahifaga yo'naltiriladi
         } else {
             const isAuthenticated = Boolean(localStorage.getItem('token'));  // Foydalanuvchi login qilganmi tekshiramiz
-
             if (!isAuthenticated) {
                 navigate('/login', { state: { id } });  // Login qilmagan bo'lsa login sahifasiga yo'naltiriladi va file_id saqlanadi
             } else {

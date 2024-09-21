@@ -34,7 +34,6 @@ function SuperAdminPanel() {
         try {
             setLoading(true);
             const response = await getUsers();
-            console.log('Fetched Users:', response?.data?.result); // Add this line
             setData(response?.data?.result || []);
             setFilteredData(response?.data?.result || []);
         } catch (error) {
@@ -47,7 +46,7 @@ function SuperAdminPanel() {
     const fetchDistricts = async () => {
         try {
             const response = await getAllDistricts();
-            console.log('Fetched Districts:', response?.data); // Add this line
+
             setDistricts(response?.data || []);
         } catch (error) {
             message.error('Tumanlarni olishda xatolik yuz berdi');
@@ -57,7 +56,7 @@ function SuperAdminPanel() {
     const fetchRoles = async () => {
         try {
             const response = await getRoles();
-            console.log('Fetched Roles:', response?.data); // Add this line
+
             setRoles(response?.data || []);
         } catch (error) {
             message.error('Rollarni olishda xatolik yuz berdi');

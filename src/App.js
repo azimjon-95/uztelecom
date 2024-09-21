@@ -8,7 +8,6 @@ import ScanPage from "./pages/workers/ScanPage";
 import FileManagement from "./pages/admin/adminPanel/AdminPanel";
 import SuperAdminPanel from "./pages/superadmin/SuperAdminPanel"; // SuperAdmin panelini import qilish
 import "./index.css";
-import Abonents from "./pages/workers/AllAbonents";
 import SprinterTable from "./pages/superadmin/sprinters/Sprinters";
 
 const App = () => {
@@ -41,7 +40,7 @@ const App = () => {
       {isUser && (
         <>
           <Route path="/scan/:id" element={<ScanPage />} />
-          <Route path="/" element={<Abonents />} />
+          <Route path="/" element={<ScanPage />} />
         </>
       )}
       {isSuperAdmin && (

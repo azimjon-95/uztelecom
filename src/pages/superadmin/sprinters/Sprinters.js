@@ -245,7 +245,7 @@ function SprinterTable() {
         }
     };
 
-    console.log(sprinters);
+
 
     return (
         <CustomLayout>

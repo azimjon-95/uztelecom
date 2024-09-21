@@ -3,7 +3,6 @@ import api from "./index";
 export const getSprinters = async () => {
     try {
         const response = await api.get('/spirinter/get-all',);
-        console.log(response.data);
         return response.data;
     } catch (error) {
         console.error('Sprinterlarni olishda xatolik:', error);

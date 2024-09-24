@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Upload, Table, Select, notification, Button, message, Modal, Input } from 'antd';
+import { Upload, Table, Select, notification, Button, message, Modal, Input, Pagination } from 'antd';
 import { UploadOutlined, PlusOutlined, DeleteOutlined, DownloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { getSprinters, addUserToSprinter, deleteUserFromSprinter } from '../../../api/spirinterAPI';
 import CustomLayout from '../../../components/layout/Layout';
@@ -13,7 +13,6 @@ function SprinterTable() {
     const [sprinters, setSprinters] = useState([]);
     const [loading, setLoading] = useState(false);
     const [expandedRowKeys, setExpandedRowKeys] = useState([]);
-    // const [selectedSprinterDel, setSelectedSprinterDel] = useState(null);
     const [selectedSprinter, setSelectedSprinter] = useState(null);
     const [userIds, setUserIds] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
@@ -27,7 +26,7 @@ function SprinterTable() {
     const [searchValue, setSearchValue] = useState("");
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState(null);
-
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         fetchDistricts();
@@ -48,13 +47,15 @@ function SprinterTable() {
         }
     };
 
-    const fetchSprinters = async () => {
+    // Sahifani yuklash funksiyasi
+    const fetchSprinters = async (page = 1) => {
         setLoading(true);
         try {
-            const data = await getSprinters();
-            setSprinters(data.result); // Sprinterlar ma'lumotlari olindi
+            const data = await getSprinters(page);
+            setSprinters(data.result);
+            setCurrentPage(page); // Joriy sahifani yangilash
         } catch (error) {
-            message.error('Sprinterlarni olishda xatolik yuz berdi');
+            console.error('Sprinterlarni olishda xatolik:', error);
         } finally {
             setLoading(false);
         }
@@ -154,7 +155,7 @@ function SprinterTable() {
                         setModalVisible(true);
                     }}
                 >
-                    Foydalanuvchi Qo'shish
+                    Master Qo'shish
                 </Button>
             ),
         },
@@ -170,7 +171,7 @@ function SprinterTable() {
                         setDeleteModalVisible(true);
                     }}
                 >
-                    Foydalanuvchini Olib Tashlash
+                    Masterni Olib Tashlash
                 </Button>
             ),
         },
@@ -207,15 +208,27 @@ function SprinterTable() {
         { title: 'Manzil', dataIndex: 'address', key: 'address' },
     ];
     const sendDataToServer = async () => {
-        console.log(data);
+        // Fayl hajmini tekshirish
+        const fileSizeInBytes = data.size; // Fayl hajmini o'lchab olish
+        const oneGBInBytes = 1024 * 1024 * 1024; // 1 GB ni baytlarda hisoblash
+
+        if (fileSizeInBytes > oneGBInBytes) {
+            notification.warning({ message: 'Fayl hajmi 1 GB dan oshmasligi kerak.' });
+            return;
+        }
+
+        // Yuklanish holatini boshqarish
+        setLoading(true); // Yuklanish animatsiyasini ishga tushirish
         try {
-            const res = await createData({ file: data });
-            console.log(res);
-            notification.success({ message: 'Ma\'lumotlar muvaffaqiyatli yuborildi!' });
-            setData([]);
+            await createData({ file: data });
+
+            notification.success({ message: "Ma'lumotlar muvaffaqiyatli yuborildi!" });
+            setData([]); // Ma'lumotlarni tozalash
         } catch (error) {
             console.error("Serverga ma'lumot jo'natishda xatolik:", error);
-            notification.error({ message: 'Ma\'lumotlar jo\'natishda xatolik yuz berdi.' });
+            notification.error({ message: "Ma'lumotlar jo'natishda xatolik yuz berdi." });
+        } finally {
+            setLoading(false); // Yuklanish holatini o'chirish
         }
     };
 
@@ -271,15 +284,21 @@ function SprinterTable() {
         }
     };
 
+
+    // Sahifani o'zgartirishda ishlatiladigan funksiya
+    const handlePageChange = (page) => {
+        fetchSprinters(page);
+    };
     // Qidirish funksiyasi
     const handleSearchInput = (value) => {
-        setSearchValue(value.toLowerCase()); // Qidirilayotgan qiymatni saqlash
+        setSearchValue(value?.toLowerCase()); // Qidirilayotgan qiymatni saqlash
     };
 
     // Sprinters ma'lumotlarini qidirishdan so'ng filtrlaymiz
-    const filteredSprinters = sprinters?.filter((sprinter) =>
+    const filteredSprinters = sprinters.data?.filter((sprinter) =>
         sprinter.technical_data?.toLowerCase().includes(searchValue) // 'technical_data' ichida 'searchValue' qiymatini qidirish
     );
+
 
     return (
         <CustomLayout>
@@ -306,11 +325,10 @@ function SprinterTable() {
                         </Button>
                     }
                 </div>
-                {/* // search */}
                 <Search
                     value={searchValue}
                     onChange={(e) => handleSearchInput(e.target.value)}
-                    placeholder="Sprinterni texnik ma'lumotlari bo'yicha qidirish..."
+                    placeholder="Sprinterni texnik ma'lumotlari bo'yicha qidirish"
                     style={{ width: 450 }}
                 />
                 {data.length > 0 ?
@@ -366,12 +384,19 @@ function SprinterTable() {
                                 pagination={false}
                                 size="small"
                                 bordered={true}
-
                             />
                         ),
                         rowExpandable: (record) => record.customers && record.customers.length > 0,
                     }}
                 />
+                <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", margin: "10px 0" }}>
+                    <Pagination
+                        current={currentPage}
+                        total={sprinters.total} // Jami elementlar
+                        pageSize={sprinters.per_page} // Bir sahifadagi elementlar
+                        onChange={handlePageChange} // Sahifa o'zgarganda
+                    />
+                </div>
 
                 <Modal
                     title={actionType === 'add' ? 'Foydalanuvchi Qo\'shish' : 'Foydalanuvchini Olib Tashlash'}

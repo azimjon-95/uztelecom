@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Upload, Table, Select, notification, Button, message, Modal, Input } from 'antd';
+import { Upload, Table, notification, Button, Select, message, Modal, Input, Pagination } from 'antd';
 import { UploadOutlined, PlusOutlined, DeleteOutlined, DownloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { getSprinters, addUserToSprinter, deleteUserFromSprinter } from '../../../api/spirinterAPI';
 import CustomLayout from '../../../components/layout/Layout';
 import * as XLSX from 'xlsx';
-import { createData, downloadDistrictZip, getAllDistricts } from '../../../api/superAdminAPI';
+import { createData, downloadDistrictZip, getUsers } from '../../../api/superAdminAPI';
 
 const { Option } = Select;
+const { Search } = Input;
 
 function FileManagement() {
     const [sprinters, setSprinters] = useState([]);
@@ -18,21 +19,41 @@ function FileManagement() {
     const [actionType, setActionType] = useState('add');
     const [data, setData] = useState([]);
     const [column, setColumns] = useState([]);
-    const [selectedDistrict, setSelectedDistrict] = useState(null);
-    const [districts, setDistricts] = useState([]);
+    const [searchValue, setSearchValue] = useState("");
+    const selectedDistrict = localStorage.getItem("districtId")
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [selectedDistrictDel, setSelectedSprinterDel] = useState(null);
+
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
-        fetchDistricts();
+        fetchUsers();
         fetchSprinters();
     }, []);
 
-    const fetchSprinters = async () => {
+    const fetchUsers = async () => {
+        try {
+            setLoading(true);
+            const response = await getUsers();
+            setFilteredUsers(response?.data?.result?.filter((i) => i.role.name === "user") || []);
+        } catch (error) {
+            message.error('Foydalanuvchilarni olishda xatolik yuz berdi');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Sahifani yuklash funksiyasi
+    const fetchSprinters = async (page = 1) => {
         setLoading(true);
         try {
-            const data = await getSprinters();
-            setSprinters(data.result); // Sprinterlar ma'lumotlari olindi
+            const data = await getSprinters(page);
+            setSprinters(data.result);
+            setCurrentPage(page); // Joriy sahifani yangilash
         } catch (error) {
-            message.error('Sprinterlarni olishda xatolik yuz berdi');
+            console.error('Sprinterlarni olishda xatolik:', error);
         } finally {
             setLoading(false);
         }
@@ -45,7 +66,6 @@ function FileManagement() {
 
     const handleViewMasters = (record) => {
         // Masalan, yangi modalni ochish va masterlar ro'yxatini ko'rsatish
-        console.log(record.mantiors);
         Modal.info({
             title: 'Biriktrilgan Masterlar Ro\'yxati',
             content: (
@@ -128,24 +148,23 @@ function FileManagement() {
                         setModalVisible(true);
                     }}
                 >
-                    Foydalanuvchi Qo'shish
+                    Master Qo'shish
                 </Button>
             ),
         },
         {
             title: 'Masterni bekor qilish',
-            key: 'actions',
+            key: 'delete_action',
             render: (text, record) => (
                 <Button
                     type="danger"
                     icon={<DeleteOutlined />}
                     onClick={() => {
-                        setSelectedSprinter(record);
-                        setActionType('delete');
-                        setModalVisible(true);
+                        setSelectedSprinterDel(record);
+                        setDeleteModalVisible(true);
                     }}
                 >
-                    Foydalanuvchini Olib Tashlash
+                    Masterni Olib Tashlash
                 </Button>
             ),
         },
@@ -165,15 +184,6 @@ function FileManagement() {
     ];
 
 
-    const fetchDistricts = async () => {
-        try {
-            const response = await getAllDistricts();
-            setDistricts(response?.data || []);
-        } catch (error) {
-            message.error('Tumanlarni olishda xatolik yuz berdi');
-        }
-    };
-
     const customerColumns = [
         { title: 'ID', dataIndex: 'id', key: 'id' },
         { title: 'Mijoz', dataIndex: 'subscriber', key: 'subscriber' },
@@ -181,16 +191,29 @@ function FileManagement() {
         { title: 'Port Nomer', dataIndex: 'port_number', key: 'port_number' },
         { title: 'Manzil', dataIndex: 'address', key: 'address' },
     ];
+
     const sendDataToServer = async () => {
-        console.log(data);
+        // Fayl hajmini tekshirish
+        const fileSizeInBytes = data.size; // Fayl hajmini o'lchab olish
+        const oneGBInBytes = 1024 * 1024 * 1024; // 1 GB ni baytlarda hisoblash
+
+        if (fileSizeInBytes > oneGBInBytes) {
+            notification.warning({ message: 'Fayl hajmi 1 GB dan oshmasligi kerak.' });
+            return;
+        }
+
+        // Yuklanish holatini boshqarish
+        setLoading(true); // Yuklanish animatsiyasini ishga tushirish
         try {
-            const res = await createData({ file: data });
-            console.log(res);
-            notification.success({ message: 'Ma\'lumotlar muvaffaqiyatli yuborildi!' });
-            setData([]);
+            await createData({ file: data });
+
+            notification.success({ message: "Ma'lumotlar muvaffaqiyatli yuborildi!" });
+            setData([]); // Ma'lumotlarni tozalash
         } catch (error) {
             console.error("Serverga ma'lumot jo'natishda xatolik:", error);
-            notification.error({ message: 'Ma\'lumotlar jo\'natishda xatolik yuz berdi.' });
+            notification.error({ message: "Ma'lumotlar jo'natishda xatolik yuz berdi." });
+        } finally {
+            setLoading(false); // Yuklanish holatini o'chirish
         }
     };
 
@@ -240,39 +263,40 @@ function FileManagement() {
 
             message.success('ZIP fayli muvaffaqiyatli yuklandi');
         } catch (error) {
-            message.error('ZIP faylini yuklashda xatolik yuz berdi');
+            message.warning('ZIP fayl topilmadi!');
         } finally {
             setLoading(false);
         }
     };
 
-    console.log(sprinters);
+    // Sahifani o'zgartirishda ishlatiladigan funksiya
+    const handlePageChange = (page) => {
+        fetchSprinters(page);
+    };
+    // Qidirish funksiyasi
+    const handleSearchInput = (value) => {
+        setSearchValue(value?.toLowerCase()); // Qidirilayotgan qiymatni saqlash
+    };
+
+    // Sprinters ma'lumotlarini qidirishdan so'ng filtrlaymiz
+    const filteredSprinters = sprinters.data?.filter((sprinter) =>
+        sprinter.technical_data?.toLowerCase().includes(searchValue) // 'technical_data' ichida 'searchValue' qiymatini qidirish
+    );
 
     return (
         <CustomLayout>
             <h2 style={{ textAlign: "center" }}>Sprinterlar ro'yxati</h2>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                <Button type="primary" onClick={handleDownload} loading={loading}>
+                    ZIP faylini yuklash
+                </Button>
 
-
-                <div style={{ display: 'flex', gap: "5px" }}>
-                    <Select
-                        style={{ width: 200, marginRight: 10 }}
-                        placeholder="Tuman tanlang"
-                        onChange={(value) => setSelectedDistrict(value)}
-                    >
-                        {districts.result?.map((district) => (
-                            <Option key={district.id} value={district.id}>
-                                {district.name}
-                            </Option>
-                        ))}
-                    </Select>
-                    {
-                        selectedDistrict &&
-                        <Button type="primary" onClick={handleDownload} loading={loading}>
-                            ZIP faylini yuklash
-                        </Button>
-                    }
-                </div>
+                <Search
+                    value={searchValue}
+                    onChange={(e) => handleSearchInput(e.target.value)}
+                    placeholder="Sprinterni texnik ma'lumotlari bo'yicha qidirish"
+                    style={{ width: 450 }}
+                />
                 {data.length > 0 ?
                     <Button onClick={sendDataToServer} type="primary" style={{ marginTop: 20 }}>Ma'lumotlarni Yuborish</Button>
                     :
@@ -309,7 +333,7 @@ function FileManagement() {
             <div>
                 <Table
                     columns={sprinterColumns}
-                    dataSource={sprinters}
+                    dataSource={filteredSprinters}
                     rowKey="id"
                     size="small"
                     loading={loading}
@@ -333,16 +357,60 @@ function FileManagement() {
                     }}
                 />
 
+                <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", margin: "10px 0" }}>
+                    <Pagination
+                        current={currentPage}
+                        total={sprinters.total} // Jami elementlar
+                        pageSize={sprinters.per_page} // Bir sahifadagi elementlar
+                        onChange={handlePageChange} // Sahifa o'zgarganda
+                    />
+                </div>
+
                 <Modal
                     title={actionType === 'add' ? 'Foydalanuvchi Qo\'shish' : 'Foydalanuvchini Olib Tashlash'}
                     open={modalVisible}
                     onOk={actionType === 'add' ? handleAddUser : handleDeleteUser}
                     onCancel={() => setModalVisible(false)}
                 >
-                    <Input
-                        placeholder="Foydalanuvchi ID larini kiriting (vergul bilan ajratilgan)"
-                        onChange={(e) => setUserIds(e.target.value.split(','))}
-                    />
+                    <Select
+                        showSearch
+                        placeholder="Foydalanuvchini tanlang"
+                        optionFilterProp="children"
+                        onChange={(value) => setUserIds([value])} // Faqat bitta foydalanuvchi ID sini array shaklida saqlash
+                        filterOption={(input, option) =>
+                            option.children?.toLowerCase().indexOf(input?.toLowerCase()) >= 0
+                        }
+                        style={{ width: '100%' }}
+                    >
+                        {filteredUsers?.map((user) => (
+                            <Option key={user.id} value={user.id}>
+                                {user.full_name}
+                            </Option>
+                        ))}
+                    </Select>
+                </Modal>
+                <Modal
+                    title="Foydalanuvchini Olib Tashlash"
+                    open={deleteModalVisible}
+                    onOk={handleDeleteUser}
+                    onCancel={() => setDeleteModalVisible(false)}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Masterni tanlang"
+                        style={{ width: '100%' }}
+                        onChange={setSelectedUserId}
+                        optionFilterProp="children"
+                        filterOption={(input, option) =>
+                            option.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                    >
+                        {selectedDistrictDel?.mantiors?.map((master) => (
+                            <Option key={master.id} value={master.id}>
+                                {master.full_name}
+                            </Option>
+                        ))}
+                    </Select>
                 </Modal>
             </div>
         </CustomLayout>
@@ -350,6 +418,26 @@ function FileManagement() {
 }
 
 export default FileManagement;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

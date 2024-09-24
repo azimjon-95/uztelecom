@@ -12,6 +12,7 @@ import {
 } from '../../../api/superAdminAPI';
 import './style.css'
 const { Option } = Select;
+const { Search } = Input;
 
 function Read() {
   const [form] = Form.useForm();
@@ -23,6 +24,7 @@ function Read() {
   const [roles, setRoles] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
 
 
   useEffect(() => {
@@ -134,41 +136,51 @@ function Read() {
       },
     },
     {
-      title: "Tahrirlash",
-      key: "action",
-      render: (text, record) => (
-        <Button
-          type="primary"
-          style={{ marginRight: 8 }}
-          onClick={() => {
-            setCurrentUser(record);
-            form.setFieldsValue({
-              full_name: record.full_name,
-              phone_number: record.phone_number,
-              role_id: record.role.id,
-              district_id: record.district_id || '',
-            });
-            setIsEdit(true);
-            setOpenBox(true);
-          }}
-        >
-          <EditOutlined />
-        </Button>
-      ),
+      title: "Tumani", dataIndex: "district", key: "district",
+      render: (district) => {
+        return district.name;
+      },
     },
-    {
-      title: "O'chirish",
-      key: "action",
-      render: (text, record) => (
-        <Button type="danger" onClick={() => showDeleteConfirm(record.id)}>
-          <DeleteOutlined />
-        </Button>
-      ),
-    },
+    // {
+    //   title: "Tahrirlash",
+    //   key: "action",
+    //   render: (text, record) => (
+    //     <Button
+    //       type="primary"
+    //       style={{ marginRight: 8 }}
+    //       onClick={() => {
+    //         setCurrentUser(record);
+    //         form.setFieldsValue({
+    //           full_name: record.full_name,
+    //           phone_number: record.phone_number,
+    //           role_id: record.role.id,
+    //           district_id: record.district_id || '',
+    //         });
+    //         setIsEdit(true);
+    //         setOpenBox(true);
+    //       }}
+    //     >
+    //       <EditOutlined />
+    //     </Button>
+    //   ),
+    // },
+    // {
+    //   title: "O'chirish",
+    //   key: "action",
+    //   render: (text, record) => (
+    //     <Button type="danger" onClick={() => showDeleteConfirm(record.id)}>
+    //       <DeleteOutlined />
+    //     </Button>
+    //   ),
+    // },
   ];
 
   const handleRoleChange = (value) => {
-    handleRoleFilter(value);
+    if (value === "all") {
+      setFilteredData(data); // Agar "Barchasi" tanlansa, barcha userlarni ko'rsatish
+    } else {
+      handleRoleFilter(value); // Muayyan rol asosida filtrlash
+    }
   };
 
   const handleRoleFilter = (roleId) => {
@@ -183,9 +195,20 @@ function Read() {
     setCurrentUser(null);
   };
 
+
+  // Qidirish funksiyasi
+  const handleSearchInput = (value) => {
+    setSearchValue(value.toLowerCase()); // Qidirilayotgan qiymatni saqlash
+  };
+
+  // Sprinters ma'lumotlarini qidirishdan so'ng filtrlaymiz
+  const filteredSprinters = filteredData?.filter((sprinter) =>
+    sprinter.full_name?.toLowerCase().includes(searchValue) // 'technical_data' ichida 'searchValue' qiymatini qidirish
+  );
+
   return (
     <CustomLayout>
-      <div style={{ width: "100%", height: "98vh", position: "relative", overflow: "hidden" }}>
+      <div style={{ width: "100%", minHeight: "98vh", position: "relative", overflow: "hidden" }}>
         <h2 style={{ textAlign: 'center', color: 'gray', marginTop: '10px' }}>Super Admin Paneli</h2>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -193,8 +216,11 @@ function Read() {
             placeholder="Rolni tanlang"
             onChange={handleRoleChange}
             style={{ width: 200 }}
+          // defaultValue="all"  // Sukut bo‘yicha "Barchasi" tanlanadi
           >
-            {/* {roles?.result?.map((role) => ( */}
+            <Select.Option key="all" value="all">
+              Barchasi
+            </Select.Option>
             {roles?.result
               ?.filter((role) => role.name !== 'super_admin') // "super_admin" ni chiqarib tashlaymiz
               .map((role) => (
@@ -207,6 +233,14 @@ function Read() {
                 </Select.Option>
               ))}
           </Select>
+
+          {/* // search */}
+          <Search
+            value={searchValue}
+            onChange={(e) => handleSearchInput(e.target.value)}
+            placeholder="Hodimlarni ism familyasi bo'yicha qidirish..."
+            style={{ width: 450 }}
+          />
 
           <Button
             type="primary"
@@ -223,7 +257,7 @@ function Read() {
           pagination={false}
           size="small"
           columns={columns}
-          dataSource={filteredData?.filter((user) => user.role.name !== 'super_admin')} // Faqat "super_admin" emaslarni ko'rsatamiz
+          dataSource={filteredSprinters?.filter((user) => user.role.name !== 'super_admin')} // Faqat "super_admin" emaslarni ko'rsatamiz
           rowKey="id"
           loading={loading}
           bordered
@@ -265,8 +299,11 @@ function Read() {
               label="Rol"
               rules={[{ required: true, message: 'Rolni tanlang' }]}
             >
+              {/* roles?.result
+              ?.filter((role) => role.name !== 'super_admin') // "super_admin" ni chiqarib tashlaymiz
+              .map((role) => ( */}
               <Select placeholder="Rolni tanlang">
-                {roles?.result?.map((role) => (
+                {roles?.result?.filter((role) => role.name !== 'super_admin').map((role) => (
                   <Option key={role.id} value={role.id}>
                     {role.name}
                   </Option>

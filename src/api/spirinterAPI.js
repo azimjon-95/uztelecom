@@ -1,15 +1,16 @@
 import api from "./index";
 
-export const getSprinters = async () => {
+export const getSprinters = async (page = 1) => {
     try {
-        const response = await api.get('/spirinter/get-all',);
+        const formattedPage = String(page).padStart(2, '0');
+        const response = await api.get(`/spirinter/get-all?page=${page}`);
         return response.data;
+
     } catch (error) {
         console.error('Sprinterlarni olishda xatolik:', error);
         throw error;
     }
 };
-
 export const addUserToSprinter = async (sprinterId, userIds) => {
     try {
         const response = await api.post('/spirinter/add-user-to-sprinter', {

@@ -39,7 +39,7 @@ function SuperAdminPanel() {
             setData(response?.data?.result || []);
             setFilteredData(response?.data?.result || []);
         } catch (error) {
-            message.error('Foydalanuvchilarni olishda xatolik yuz berdi');
+            console.error('Foydalanuvchilarni olishda xatolik yuz berdi');
         } finally {
             setLoading(false);
         }
@@ -51,7 +51,7 @@ function SuperAdminPanel() {
 
             setDistricts(response?.data || []);
         } catch (error) {
-            message.error('Tumanlarni olishda xatolik yuz berdi');
+            console.error('Tumanlarni olishda xatolik yuz berdi');
         }
     };
 
@@ -61,7 +61,7 @@ function SuperAdminPanel() {
 
             setRoles(response?.data || []);
         } catch (error) {
-            message.error('Rollarni olishda xatolik yuz berdi');
+            console.error('Rollarni olishda xatolik yuz berdi');
         }
     };
 
@@ -73,7 +73,7 @@ function SuperAdminPanel() {
             setOpenBox(false);
             fetchUsers();
         } catch (error) {
-            message.error('User yaratishda xatolik yuz berdi');
+            console.error('User yaratishda xatolik yuz berdi');
         }
     };
 
@@ -87,7 +87,7 @@ function SuperAdminPanel() {
                 fetchUsers();
             }
         } catch (error) {
-            message.error('Foydalanuvchini yangilashda xatolik yuz berdi');
+            console.error('Foydalanuvchini yangilashda xatolik yuz berdi');
         }
     };
 
@@ -98,7 +98,7 @@ function SuperAdminPanel() {
             message.success("Foydalanuvchi muvaffaqiyatli o'chirildi");
             setData((prevData) => prevData.filter((item) => item.id !== id));
         } catch (error) {
-            message.error("Foydalanuvchini o'chirishda xatolik yuz berdi");
+            console.error("Foydalanuvchini o'chirishda xatolik yuz berdi");
         } finally {
             setLoading(false);
         }
@@ -185,7 +185,6 @@ function SuperAdminPanel() {
     };
 
     const handleRoleFilter = (roleId) => {
-        console.log('Filtering with Role ID:', roleId); // Add this line
         const filtered = data.filter((user) => user.role.id === roleId);
         setFilteredData(filtered);
     };
@@ -206,10 +205,10 @@ function SuperAdminPanel() {
     const filteredSprinters = filteredData?.filter((sprinter) =>
         sprinter.full_name?.toLowerCase().includes(searchValue) // 'technical_data' ichida 'searchValue' qiymatini qidirish
     );
-    console.log(filteredSprinters);
+
     return (
         <CustomLayout>
-            <div style={{ width: "100%", height: "98vh", position: "relative", overflow: "hidden" }}>
+            <div style={{ width: "100%", minHeight: "98vh", position: "relative", overflow: "hidden" }}>
                 <h2 style={{ textAlign: 'center', color: 'gray', marginTop: '10px' }}>Super Admin Paneli</h2>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -260,7 +259,6 @@ function SuperAdminPanel() {
                     rowKey="id"
                     loading={loading}
                     bordered
-                    scroll={{ y: 500 }}
                 />
 
 

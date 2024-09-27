@@ -23,11 +23,11 @@ function SprinterTable() {
     const [selectedDistrictDel, setSelectedSprinterDel] = useState(null);
     const [districts, setDistricts] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
-    const [searchValue, setSearchValue] = useState("");
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-
+    const [search, setSearchTerm] = useState("");
+    const [debounceTimeout, setDebounceTimeout] = useState(null);
     useEffect(() => {
         fetchDistricts();
         fetchSprinters();
@@ -47,11 +47,12 @@ function SprinterTable() {
         }
     };
 
+
     // Sahifani yuklash funksiyasi
-    const fetchSprinters = async (page = 1) => {
+    const fetchSprinters = async (page = 1, per_page) => {
         setLoading(true);
         try {
-            const data = await getSprinters(page);
+            const data = await getSprinters({ page, per_page, search });
             setSprinters(data.result);
             setCurrentPage(page); // Joriy sahifani yangilash
         } catch (error) {
@@ -60,6 +61,29 @@ function SprinterTable() {
             setLoading(false);
         }
     };
+
+
+    // Qidiruv funksiyasi
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchTerm(value);
+
+        // Agar oldin timeout mavjud bo'lsa, uni tozalaymiz
+        if (debounceTimeout) {
+            clearTimeout(debounceTimeout);
+        }
+
+        // 500ms kechikish bilan yangi so'rov yuboramiz
+        const newTimeout = setTimeout(() => {
+            fetchSprinters(1, 10, value);
+        }, 500);
+
+        // Yangi timeoutni saqlaymiz
+        setDebounceTimeout(newTimeout);
+    };
+
+
+
     const columnsUsers = [
         { title: "ID", dataIndex: "id", key: "id" },
         { title: "Ism / Familiya", dataIndex: "full_name", key: "full_name" },
@@ -110,6 +134,7 @@ function SprinterTable() {
             message.error('Foydalanuvchini olib tashlashda xatolik yuz berdi');
         }
     };
+
     const handleExpand = (expanded, record) => {
         if (expanded) {
             setExpandedRowKeys([record.id]);
@@ -126,6 +151,7 @@ function SprinterTable() {
         link.target = '_blank'; // Yangi tabda ochilishi uchun qo'shimcha xavfsizlik chorasi
         link.click(); // Yuklashni boshlash
     };
+
     const sprinterColumns = [
         { title: 'ID', dataIndex: 'id', key: 'id' },
         { title: 'Texnik Ma\'lumotlar', dataIndex: 'technical_data', key: 'technical_data' },
@@ -207,6 +233,7 @@ function SprinterTable() {
         { title: 'Port Nomer', dataIndex: 'port_number', key: 'port_number' },
         { title: 'Manzil', dataIndex: 'address', key: 'address' },
     ];
+
     const sendDataToServer = async () => {
         // Fayl hajmini tekshirish
         const fileSizeInBytes = data.size; // Fayl hajmini o'lchab olish
@@ -216,7 +243,6 @@ function SprinterTable() {
             notification.warning({ message: 'Fayl hajmi 1 GB dan oshmasligi kerak.' });
             return;
         }
-
         // Yuklanish holatini boshqarish
         setLoading(true); // Yuklanish animatsiyasini ishga tushirish
         try {
@@ -287,18 +313,16 @@ function SprinterTable() {
 
     // Sahifani o'zgartirishda ishlatiladigan funksiya
     const handlePageChange = (page) => {
-        fetchSprinters(page);
-    };
-    // Qidirish funksiyasi
-    const handleSearchInput = (value) => {
-        setSearchValue(value?.toLowerCase()); // Qidirilayotgan qiymatni saqlash
+        fetchSprinters(page, sprinters.per_page);
     };
 
-    // Sprinters ma'lumotlarini qidirishdan so'ng filtrlaymiz
-    const filteredSprinters = sprinters.data?.filter((sprinter) =>
-        sprinter.technical_data?.toLowerCase().includes(searchValue) // 'technical_data' ichida 'searchValue' qiymatini qidirish
-    );
 
+    useEffect(() => {
+        // Qidiruv maydoni bo'sh bo'lsa barcha sprinterlarni yuklash
+        if (!search) {
+            fetchSprinters();
+        }
+    }, [search]);
 
     return (
         <CustomLayout>
@@ -326,8 +350,8 @@ function SprinterTable() {
                     }
                 </div>
                 <Search
-                    value={searchValue}
-                    onChange={(e) => handleSearchInput(e.target.value)}
+                    value={search}
+                    onChange={handleSearch}
                     placeholder="Sprinterni texnik ma'lumotlari bo'yicha qidirish"
                     style={{ width: 450 }}
                 />
@@ -367,7 +391,7 @@ function SprinterTable() {
             <div>
                 <Table
                     columns={sprinterColumns}
-                    dataSource={filteredSprinters}
+                    dataSource={sprinters.data}
                     rowKey="id"
                     size="small"
                     loading={loading}
@@ -450,7 +474,3 @@ function SprinterTable() {
 }
 
 export default SprinterTable;
-
-
-
-

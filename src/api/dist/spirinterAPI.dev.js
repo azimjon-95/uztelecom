@@ -9,20 +9,24 @@ var _index = _interopRequireDefault(require("./index"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var getSprinters = function getSprinters() {
-  var page,
-      formattedPage,
-      response,
-      _args = arguments;
+var getSprinters = function getSprinters(_ref) {
+  var _ref$page, page, _ref$per_page, per_page, _ref$search, search, formattedPage, response;
+
   return regeneratorRuntime.async(function getSprinters$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          page = _args.length > 0 && _args[0] !== undefined ? _args[0] : 1;
+          _ref$page = _ref.page, page = _ref$page === void 0 ? 1 : _ref$page, _ref$per_page = _ref.per_page, per_page = _ref$per_page === void 0 ? 10 : _ref$per_page, _ref$search = _ref.search, search = _ref$search === void 0 ? "" : _ref$search;
           _context.prev = 1;
           formattedPage = String(page).padStart(2, '0');
           _context.next = 5;
-          return regeneratorRuntime.awrap(_index["default"].get("/spirinter/get-all?page=".concat(page)));
+          return regeneratorRuntime.awrap(_index["default"].get("/spirinter/get-all", {
+            params: {
+              page: formattedPage,
+              per_page: per_page,
+              search: search
+            }
+          }));
 
         case 5:
           response = _context.sent;

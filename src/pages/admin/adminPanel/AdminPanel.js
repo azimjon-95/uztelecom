@@ -19,10 +19,11 @@ function FileManagement() {
     const [actionType, setActionType] = useState('add');
     const [data, setData] = useState([]);
     const [column, setColumns] = useState([]);
-    const [searchValue, setSearchValue] = useState("");
+    const [search, setSearchTerm] = useState("");
     const selectedDistrict = localStorage.getItem("districtId")
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [selectedDistrictDel, setSelectedSprinterDel] = useState(null);
+    const [debounceTimeout, setDebounceTimeout] = useState(null);
 
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState(null);
@@ -46,10 +47,10 @@ function FileManagement() {
     };
 
     // Sahifani yuklash funksiyasi
-    const fetchSprinters = async (page = 1) => {
+    const fetchSprinters = async (page = 1, per_page) => {
         setLoading(true);
         try {
-            const data = await getSprinters(page);
+            const data = await getSprinters({ page, per_page, search });
             setSprinters(data.result);
             setCurrentPage(page); // Joriy sahifani yangilash
         } catch (error) {
@@ -58,6 +59,7 @@ function FileManagement() {
             setLoading(false);
         }
     };
+
     const columnsUsers = [
         { title: "ID", dataIndex: "id", key: "id" },
         { title: "Ism / Familiya", dataIndex: "full_name", key: "full_name" },
@@ -95,9 +97,16 @@ function FileManagement() {
 
     const handleDeleteUser = async () => {
         try {
-            await deleteUserFromSprinter(selectedSprinter.id, userIds);
-            message.success('Foydalanuvchi sprinterdan olib tashlandi');
-            setModalVisible(false);
+            if (selectedUserId && selectedDistrictDel?.id) {
+
+                await deleteUserFromSprinter(selectedSprinter.id, [selectedUserId]);
+                message.success('Foydalanuvchi sprinterdan olib tashlandi');
+                setModalVisible(false);
+                setDeleteModalVisible(false);
+                setSelectedSprinterDel(null);
+            } else {
+                message.warning('Iltimos foydalanuvchini tanlang');
+            }
         } catch (error) {
             message.error('Foydalanuvchini olib tashlashda xatolik yuz berdi');
         }
@@ -271,17 +280,35 @@ function FileManagement() {
 
     // Sahifani o'zgartirishda ishlatiladigan funksiya
     const handlePageChange = (page) => {
-        fetchSprinters(page);
-    };
-    // Qidirish funksiyasi
-    const handleSearchInput = (value) => {
-        setSearchValue(value?.toLowerCase()); // Qidirilayotgan qiymatni saqlash
+        fetchSprinters(page, sprinters.per_page);
     };
 
+    // Qidirish funksiyasi
+    const handleSearchInput = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchTerm(value);
+
+        // Agar oldin timeout mavjud bo'lsa, uni tozalaymiz
+        if (debounceTimeout) {
+            clearTimeout(debounceTimeout);
+        }
+
+        // 500ms kechikish bilan yangi so'rov yuboramiz
+        const newTimeout = setTimeout(() => {
+            fetchSprinters(1, 10, value);
+        }, 500);
+
+        // Yangi timeoutni saqlaymiz
+        setDebounceTimeout(newTimeout);
+    };
+
+    useEffect(() => {
+        // Qidiruv maydoni bo'sh bo'lsa barcha sprinterlarni yuklash
+        if (!search) {
+            fetchSprinters();
+        }
+    }, [search]);
     // Sprinters ma'lumotlarini qidirishdan so'ng filtrlaymiz
-    const filteredSprinters = sprinters.data?.filter((sprinter) =>
-        sprinter.technical_data?.toLowerCase().includes(searchValue) // 'technical_data' ichida 'searchValue' qiymatini qidirish
-    );
 
     return (
         <CustomLayout>
@@ -292,7 +319,7 @@ function FileManagement() {
                 </Button>
 
                 <Search
-                    value={searchValue}
+                    value={search}
                     onChange={(e) => handleSearchInput(e.target.value)}
                     placeholder="Sprinterni texnik ma'lumotlari bo'yicha qidirish"
                     style={{ width: 450 }}
@@ -333,7 +360,7 @@ function FileManagement() {
             <div>
                 <Table
                     columns={sprinterColumns}
-                    dataSource={filteredSprinters}
+                    dataSource={sprinters.data}
                     rowKey="id"
                     size="small"
                     loading={loading}

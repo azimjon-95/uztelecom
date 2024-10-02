@@ -5,8 +5,8 @@ import {
     LogoutOutlined,
     DashboardOutlined,
 } from '@ant-design/icons';
-
-import { Layout, Menu, Modal } from 'antd';
+import api from '../../api/index';
+import { Layout, Menu, Modal, message } from 'antd';
 import './style.css';
 import logoOne from '../../assets/logo.svg';
 import logoTwo from '../../assets/logoTwo.png';
@@ -33,9 +33,19 @@ const CustomLayout = ({ children }) => {
 
     const menuRef = useRef(null);
 
-    const handleLogout = () => {
-        localStorage.removeItem('role');
-        window.location.href = '/login';
+
+    // Logout qilish funksiyasi
+    const handleLogout = async () => {
+        try {
+            const response = await api.post('/auth/logout');
+            message.success('Muvaffaqiyatli tizimdan chiqdingiz:', response.data.result);
+            setTimeout(() => {
+                localStorage.removeItem('role');
+                window.location.href = '/login';
+            }, 2000);
+        } catch (error) {
+            message.warning('Tizimdan chiqishda xatolik:', error.response?.data || error.message);
+        }
     };
 
     const showLogoutModal = () => {
@@ -175,8 +185,3 @@ const CustomLayout = ({ children }) => {
 };
 
 export default CustomLayout;
-
-
-
-
-

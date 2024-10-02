@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Input, Form, Select, message } from 'antd';
 import { ArrowLeftOutlined, EditOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import CustomLayout from '../../components/layout/Layout';
+import api from '../../api/index';
+
 import {
     getUsers,
     getAllDistricts,
@@ -52,6 +54,23 @@ function SuperAdminPanel() {
             setDistricts(response?.data || []);
         } catch (error) {
             console.error('Tumanlarni olishda xatolik yuz berdi');
+        }
+    };
+
+    // Eski tokenni o'chirish va yangi tokenni saqlash
+    const refreshAuthToken = async () => {
+        try {
+            const response = await api.post('/auth/refresh');
+            const newToken = response.data.newToken || '';
+            // const { token } = response?.data?.result;
+
+            // Eski tokenni o'chirish va yangi tokenni saqlash
+            localStorage.removeItem('token');
+            localStorage.setItem('token', newToken);
+
+            message.success('Token muvaffaqiyatli yangilandi.');
+        } catch (error) {
+            message.warning('Tokenni yangilashda xatolik yuz berdi.');
         }
     };
 
@@ -231,6 +250,12 @@ function SuperAdminPanel() {
                             </Select.Option>
                         ))}
                     </Select>
+
+
+                    <Button onClick={refreshAuthToken} type='primary'>
+                        Tokenni Yangilash
+                    </Button>
+
 
                     {/* // search */}
                     <Search

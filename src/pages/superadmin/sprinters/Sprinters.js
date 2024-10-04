@@ -20,7 +20,7 @@ function SprinterTable() {
     const [actionType, setActionType] = useState('add');
     const [data, setData] = useState([]);
     const [column, setColumns] = useState([]);
-    const [selectedDistrict, setSelectedDistrict] = useState(null);
+    const [selectedDistrict, setSelectedDistrict] = useState("all");
     const [selectedDistrictDel, setSelectedSprinterDel] = useState(null);
     const [districts, setDistricts] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
@@ -340,6 +340,7 @@ function SprinterTable() {
             sprinter.mantiors?.some(mantior => mantior.district_id === selectedDistrict)
         );
 
+
     // If no matching district_id is found and selectedDistrict is not "all", show an empty array for "No data"
     const finalResult = result?.length > 0 ? result : [];
 
@@ -356,6 +357,7 @@ function SprinterTable() {
                         style={{ width: 200, marginRight: 10 }}
                         placeholder="Tuman tanlang"
                         onChange={(value) => setSelectedDistrict(value)}
+                        defaultValue="all"
                     >
                         <Option key="all" value="all">
                             Барча туманлар
@@ -437,6 +439,7 @@ function SprinterTable() {
                         rowExpandable: (record) => record.customers && record.customers.length > 0,
                     }}
                 />
+
                 <div className='Pagination-main' style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", margin: "10px 0" }}>
                     <Pagination
                         current={currentPage}
@@ -445,6 +448,7 @@ function SprinterTable() {
                         onChange={handlePageChange} // Sahifa o'zgarganda
                     />
                 </div>
+
 
                 <Modal
                     title={actionType === 'add' ? 'Foydalanuvchi Qo\'shish' : 'Foydalanuvchini Olib Tashlash'}

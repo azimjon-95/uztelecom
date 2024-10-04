@@ -340,8 +340,8 @@ function SprinterTable() {
             sprinter.mantiors?.some(mantior => mantior.district_id === selectedDistrict)
         );
 
-    // If no matching district_id is found and selectedDistrict is not "all", return all data
-    const finalResult = result?.length > 0 ? result : sprinters?.data;
+    // If no matching district_id is found and selectedDistrict is not "all", show an empty array for "No data"
+    const finalResult = result?.length > 0 ? result : [];
 
 
 

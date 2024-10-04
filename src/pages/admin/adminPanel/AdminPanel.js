@@ -4,6 +4,8 @@ import { UploadOutlined, PlusOutlined, DeleteOutlined, DownloadOutlined, SearchO
 import { getSprinters, addUserToSprinter, deleteUserFromSprinter } from '../../../api/spirinterAPI';
 import CustomLayout from '../../../components/layout/Layout';
 import * as XLSX from 'xlsx';
+import '../../superadmin/sprinters/style.css';
+
 import { createData, downloadDistrictZip, getUsers } from '../../../api/superAdminAPI';
 
 const { Option } = Select;
@@ -384,7 +386,7 @@ function FileManagement() {
                     }}
                 />
 
-                <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", margin: "10px 0" }}>
+                <div className='Pagination-main' style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", margin: "10px 0" }}>
                     <Pagination
                         current={currentPage}
                         total={sprinters.total} // Jami elementlar

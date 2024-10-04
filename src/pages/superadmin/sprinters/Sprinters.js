@@ -459,14 +459,14 @@ function SprinterTable() {
 
 
                 <Modal
-                    title={actionType === 'add' ? 'Foydalanuvchi Qo\'shish' : 'Foydalanuvchini Olib Tashlash'}
+                    title={actionType === 'add' ? 'Master Qo\'shish' : 'Masterni Olib Tashlash'}
                     open={modalVisible}
                     onOk={actionType === 'add' ? handleAddUser : handleDeleteUser}
                     onCancel={() => setModalVisible(false)}
                 >
                     <Select
                         showSearch
-                        placeholder="Foydalanuvchini tanlang"
+                        placeholder="Master tanlang"
                         optionFilterProp="children"
                         onChange={(value) => setUserIds([value])} // Faqat bitta foydalanuvchi ID sini array shaklida saqlash
                         filterOption={(input, option) =>
@@ -476,13 +476,13 @@ function SprinterTable() {
                     >
                         {filteredUsers?.map((user) => (
                             <Option key={user.id} value={user.id}>
-                                {user.full_name}
+                                {user?.full_name} | {user?.district?.name}
                             </Option>
                         ))}
                     </Select>
                 </Modal>
                 <Modal
-                    title="Foydalanuvchini Olib Tashlash"
+                    title="Masterni Olib Tashlash"
                     open={deleteModalVisible}
                     onOk={handleDeleteUser}
                     onCancel={() => setDeleteModalVisible(false)}
@@ -499,7 +499,7 @@ function SprinterTable() {
                     >
                         {selectedDistrictDel?.mantiors?.map((master) => (
                             <Option key={master.id} value={master.id}>
-                                {master.full_name}
+                                {master?.full_name} | {master?.district?.name}
                             </Option>
                         ))}
                     </Select>

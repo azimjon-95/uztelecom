@@ -312,7 +312,7 @@ function SprinterTable() {
 
             message.success('ZIP fayli muvaffaqiyatli yuklandi');
         } catch (error) {
-            message.error('ZIP faylini yuklashda xatolik yuz berdi');
+            message.warning('ZIP fayl topilmadi!');
         } finally {
             setLoading(false);
         }
@@ -333,6 +333,8 @@ function SprinterTable() {
     }, [search]);
     // selectedDistrict
 
+    const [isLessThanTen, setIsLessThanTen] = useState(false);
+
     // Check if selectedDistrict is "all" and return all data
     const result = selectedDistrict === "all"
         ? sprinters?.data
@@ -343,8 +345,10 @@ function SprinterTable() {
 
     // If no matching district_id is found and selectedDistrict is not "all", show an empty array for "No data"
     const finalResult = result?.length > 0 ? result : [];
-
-
+    useEffect(() => {
+        // Set the flag to true if result has fewer than 10 items, otherwise false
+        setIsLessThanTen(finalResult?.length >= 10);
+    }, [finalResult]); // Runs the effect whenever result changes
 
     return (
         <CustomLayout>
@@ -368,12 +372,11 @@ function SprinterTable() {
                             </Option>
                         ))}
                     </Select>
-                    {
-                        selectedDistrict &&
+                    {selectedDistrict && selectedDistrict !== "all" && (
                         <Button type="primary" onClick={handleDownload} loading={loading}>
                             ZIP faylini yuklash
                         </Button>
-                    }
+                    )}
                 </div>
                 <Search
                     value={search}
@@ -389,31 +392,33 @@ function SprinterTable() {
                     </Upload>
                 }
             </div>
-            {data?.length > 0 && (
-                <table className="data-table">
-                    <thead>
-                        <tr>
-                            {column.map((col) => (
-                                <th key={col} style={{ border: "1px solid black", padding: 10 }}>
-                                    {col}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data?.map((row, rowIndex) => (
-                            <tr key={rowIndex}>
+            {
+                data?.length > 0 && (
+                    <table className="data-table">
+                        <thead>
+                            <tr>
                                 {column.map((col) => (
-                                    <td key={col} style={{ border: "1px solid black", padding: 10 }}>
-                                        {row[col]}
-                                    </td>
+                                    <th key={col} style={{ border: "1px solid black", padding: 10 }}>
+                                        {col}
+                                    </th>
                                 ))}
-
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
+                        </thead>
+                        <tbody>
+                            {data?.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                    {column.map((col) => (
+                                        <td key={col} style={{ border: "1px solid black", padding: 10 }}>
+                                            {row[col]}
+                                        </td>
+                                    ))}
+
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )
+            }
             <div>
                 <Table
                     columns={sprinterColumns}
@@ -440,14 +445,17 @@ function SprinterTable() {
                     }}
                 />
 
-                <div className='Pagination-main' style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", margin: "10px 0" }}>
-                    <Pagination
-                        current={currentPage}
-                        total={sprinters.total} // Jami elementlar
-                        pageSize={sprinters.per_page} // Bir sahifadagi elementlar
-                        onChange={handlePageChange} // Sahifa o'zgarganda
-                    />
-                </div>
+                {
+                    isLessThanTen &&
+                    <div className='Pagination-main' style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", margin: "10px 0" }}>
+                        <Pagination
+                            current={currentPage}
+                            total={sprinters.total} // Jami elementlar
+                            pageSize={sprinters.per_page} // Bir sahifadagi elementlar
+                            onChange={handlePageChange} // Sahifa o'zgarganda
+                        />
+                    </div>
+                }
 
 
                 <Modal
@@ -497,7 +505,7 @@ function SprinterTable() {
                     </Select>
                 </Modal>
             </div>
-        </CustomLayout>
+        </CustomLayout >
     );
 }
 

@@ -85,7 +85,7 @@ const CustomLayout = ({ children }) => {
         {
             key: '3',
             icon: <TeamOutlined style={isMobile ? { fontSize: '22px', color: "#fff" } : { color: "#fff" }} />,
-            label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/sprinters">Sprinterlar</Link>
+            label: <Link style={{ textDecoration: "none", color: "#fff" }} to="/sprinters">Splitterlar</Link>
         },
         {
             key: 'logout',

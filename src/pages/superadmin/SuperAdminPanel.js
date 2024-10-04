@@ -57,22 +57,6 @@ function SuperAdminPanel() {
         }
     };
 
-    // Eski tokenni o'chirish va yangi tokenni saqlash
-    const refreshAuthToken = async () => {
-        try {
-            const response = await api.post('/auth/refresh');
-            const newToken = response.data.newToken || '';
-            // const { token } = response?.data?.result;
-
-            // Eski tokenni o'chirish va yangi tokenni saqlash
-            localStorage.removeItem('token');
-            localStorage.setItem('token', newToken);
-
-            message.success('Token muvaffaqiyatli yangilandi.');
-        } catch (error) {
-            message.warning('Tokenni yangilashda xatolik yuz berdi.');
-        }
-    };
 
     const fetchRoles = async () => {
         try {
@@ -252,9 +236,6 @@ function SuperAdminPanel() {
                     </Select>
 
 
-                    <Button onClick={refreshAuthToken} type='primary'>
-                        Tokenni Yangilash
-                    </Button>
 
 
                     {/* // search */}

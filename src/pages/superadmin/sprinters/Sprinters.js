@@ -4,6 +4,7 @@ import { UploadOutlined, PlusOutlined, DeleteOutlined, DownloadOutlined, SearchO
 import { getSprinters, addUserToSprinter, deleteUserFromSprinter } from '../../../api/spirinterAPI';
 import CustomLayout from '../../../components/layout/Layout';
 import * as XLSX from 'xlsx';
+import './style.css';
 import { createData, downloadDistrictZip, getAllDistricts, getUsers } from '../../../api/superAdminAPI';
 
 const { Option } = Select;
@@ -88,9 +89,16 @@ function SprinterTable() {
         { title: "ID", dataIndex: "id", key: "id" },
         { title: "Ism / Familiya", dataIndex: "full_name", key: "full_name" },
         { title: "Telefon raqam", dataIndex: "phone_number", key: "phone_number" },
+        {
+            title: "Tumani",
+            dataIndex: "district",
+            key: "district",
+            render: (text) => text?.name || 'Noma\'lum'
+        },
     ];
 
     const handleViewMasters = (record) => {
+        console.log(record);
         // Masalan, yangi modalni ochish va masterlar ro'yxatini ko'rsatish
         Modal.info({
             title: 'Biriktrilgan Masterlar Ro\'yxati',
@@ -323,10 +331,23 @@ function SprinterTable() {
             fetchSprinters();
         }
     }, [search]);
+    // selectedDistrict
+
+    // Check if selectedDistrict is "all" and return all data
+    const result = selectedDistrict === "all"
+        ? sprinters?.data
+        : sprinters?.data?.filter(sprinter =>
+            sprinter.mantiors?.some(mantior => mantior.district_id === selectedDistrict)
+        );
+
+    // If no matching district_id is found and selectedDistrict is not "all", return all data
+    const finalResult = result?.length > 0 ? result : sprinters?.data;
+
+
 
     return (
         <CustomLayout>
-            <h2 style={{ textAlign: "center" }}>Sprinterlar ro'yxati</h2>
+            <h2 style={{ textAlign: "center" }}>Splitterlar ro'yxati</h2>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
 
 
@@ -336,6 +357,9 @@ function SprinterTable() {
                         placeholder="Tuman tanlang"
                         onChange={(value) => setSelectedDistrict(value)}
                     >
+                        <Option key="all" value="all">
+                            Барча туманлар
+                        </Option>
                         {districts.result?.map((district) => (
                             <Option key={district.id} value={district.id}>
                                 {district.name}
@@ -391,7 +415,7 @@ function SprinterTable() {
             <div>
                 <Table
                     columns={sprinterColumns}
-                    dataSource={sprinters.data}
+                    dataSource={finalResult}
                     rowKey="id"
                     size="small"
                     loading={loading}
@@ -413,7 +437,7 @@ function SprinterTable() {
                         rowExpandable: (record) => record.customers && record.customers.length > 0,
                     }}
                 />
-                <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", margin: "10px 0" }}>
+                <div className='Pagination-main' style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", margin: "10px 0" }}>
                     <Pagination
                         current={currentPage}
                         total={sprinters.total} // Jami elementlar
@@ -474,3 +498,20 @@ function SprinterTable() {
 }
 
 export default SprinterTable;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

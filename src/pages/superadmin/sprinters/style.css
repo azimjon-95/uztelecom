@@ -1,0 +1,8 @@
+.Pagination-main .ant-select .ant-select-selector {
+    display: none;
+}
+
+.Pagination-main .ant-pagination .ant-pagination-options {
+    display: none;
+
+}

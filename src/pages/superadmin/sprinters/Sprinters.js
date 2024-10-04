@@ -98,7 +98,6 @@ function SprinterTable() {
     ];
 
     const handleViewMasters = (record) => {
-        console.log(record);
         // Masalan, yangi modalni ochish va masterlar ro'yxatini ko'rsatish
         Modal.info({
             title: 'Biriktrilgan Masterlar Ro\'yxati',
@@ -110,8 +109,10 @@ function SprinterTable() {
                     pagination={false}
                     size="small"
                     bordered={true}
+
                 />
             ),
+            width: 750, // Modalning kengligini 800 pikselga o'rnatish
             onOk() { },
         });
     };
